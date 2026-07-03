@@ -14,16 +14,204 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          meta: Json
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      contact_versions: {
+        Row: {
+          contact_count: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          version_number: number
+        }
+        Insert: {
+          contact_count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          version_number: number
+        }
+        Update: {
+          contact_count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          version_number?: number
+        }
+        Relationships: []
+      }
+      downloads: {
+        Row: {
+          contact_count: number
+          created_at: string
+          download_type: string
+          from_version: number
+          id: string
+          to_version: number
+          user_id: string
+        }
+        Insert: {
+          contact_count?: number
+          created_at?: string
+          download_type: string
+          from_version?: number
+          id?: string
+          to_version?: number
+          user_id: string
+        }
+        Update: {
+          contact_count?: number
+          created_at?: string
+          download_type?: string
+          from_version?: number
+          id?: string
+          to_version?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          contact_seq: number
+          country: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          last_download_date: string | null
+          last_download_version_number: number
+          phone: string
+          registration_date: string
+          total_contacts_received: number
+          updated_at: string
+          user_code: string
+          version_id: string | null
+        }
+        Insert: {
+          contact_seq: number
+          country: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id: string
+          is_active?: boolean
+          last_download_date?: string | null
+          last_download_version_number?: number
+          phone: string
+          registration_date?: string
+          total_contacts_received?: number
+          updated_at?: string
+          user_code: string
+          version_id?: string | null
+        }
+        Update: {
+          contact_seq?: number
+          country?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          last_download_date?: string | null
+          last_download_version_number?: number
+          phone?: string
+          registration_date?: string
+          total_contacts_received?: number
+          updated_at?: string
+          user_code?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "contact_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      email_for_phone: { Args: { _phone: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      phone_exists: { Args: { _phone: string }; Returns: boolean }
+      publish_new_version: {
+        Args: never
+        Returns: {
+          contact_count: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          version_number: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "contact_versions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +338,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
