@@ -149,7 +149,7 @@ function AdminPage() {
 
   function exportCsv() {
     const header = ["user_code", "full_name", "phone", "country", "status", "registration_date", "total_contacts_received"];
-    const rows = users.map((u) => header.map((h) => JSON.stringify((u as Record<string, unknown>)[h] ?? "")).join(","));
+    const rows = users.map((u) => header.map((h) => JSON.stringify((u as unknown as Record<string, unknown>)[h] ?? "")).join(","));
     const csv = [header.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);

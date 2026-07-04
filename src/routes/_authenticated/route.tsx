@@ -40,6 +40,9 @@ function ProtectedLayout() {
             <Link to="/dashboard">
               <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Dashboard</span></Button>
             </Link>
+            <Link to="/download-history">
+              <Button variant="ghost" size="sm"><History className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">History</span></Button>
+            </Link>
             {isAdmin && (
               <Link to="/admin">
                 <Button variant="ghost" size="sm"><Shield className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Admin</span></Button>
