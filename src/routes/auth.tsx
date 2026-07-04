@@ -24,20 +24,24 @@ const phoneSchema = z
   .trim()
   .regex(/^\+[1-9]\d{6,14}$/, "Include country code, e.g. +2348012345678");
 
-const registerSchema = z.object({
-  full_name: z.string().trim().min(2).max(100),
-  phone: phoneSchema,
-  email: z.string().trim().email().max(255).optional().or(z.literal("")),
-  country: z.string().trim().min(2).max(60),
-  password: z.string().min(6).max(72),
-});
+const registerSchema = z
+  .object({
+    full_name: z.string().trim().min(2, "Enter your full name").max(100),
+    phone: phoneSchema,
+    country: z.string().trim().min(2, "Enter your country").max(60),
+    password: z.string().min(6, "Password must be at least 6 characters").max(72),
+    confirm_password: z.string(),
+  })
+  .refine((v) => v.password === v.confirm_password, {
+    path: ["confirm_password"],
+    message: "Passwords do not match",
+  });
 
 function normalizePhone(p: string) {
   return p.trim().replace(/\s+/g, "");
 }
 
 function syntheticEmail(phone: string) {
-  // Used when the user does not provide an email
   return `${phone.replace(/[^\d]/g, "")}@statusconnect.local`;
 }
 
@@ -99,7 +103,7 @@ function LoginForm() {
     <form onSubmit={submit} className="space-y-4">
       <h1 className="text-xl font-semibold text-foreground">Log in</h1>
       <div>
-        <Label htmlFor="phone">Phone number</Label>
+        <Label htmlFor="phone">WhatsApp number</Label>
         <Input id="phone" placeholder="+2348012345678" value={phone} onChange={(e) => setPhone(e.target.value)} required />
       </div>
       <div>
@@ -116,7 +120,7 @@ function LoginForm() {
 }
 
 function RegisterForm() {
-  const [form, setForm] = useState({ full_name: "", phone: "", email: "", country: "", password: "" });
+  const [form, setForm] = useState({ full_name: "", phone: "", country: "", password: "", confirm_password: "" });
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
@@ -129,14 +133,13 @@ function RegisterForm() {
     setBusy(true);
     try {
       const parsed = registerSchema.parse({ ...form, phone: normalizePhone(form.phone) });
-      // Phone dedupe check
       const { data: exists } = await supabase.rpc("phone_exists", { _phone: parsed.phone });
       if (exists) {
         toast.error("This phone number is already registered. Please log in instead.");
         navigate({ to: "/auth" });
         return;
       }
-      const email = parsed.email && parsed.email.length ? parsed.email : syntheticEmail(parsed.phone);
+      const email = syntheticEmail(parsed.phone);
       const { error } = await supabase.auth.signUp({
         email,
         password: parsed.password,
@@ -145,14 +148,13 @@ function RegisterForm() {
           data: {
             full_name: parsed.full_name,
             phone: parsed.phone,
-            email_contact: parsed.email || "",
             country: parsed.country,
           },
         },
       });
       if (error) throw error;
       await logAudit("registration", { phone: parsed.phone });
-      toast.success("Account created");
+      toast.success("Account created — awaiting approval");
       navigate({ to: "/dashboard" });
     } catch (err) {
       if (err instanceof z.ZodError) toast.error(err.issues[0].message);
@@ -165,17 +167,16 @@ function RegisterForm() {
   return (
     <form onSubmit={submit} className="space-y-4">
       <h1 className="text-xl font-semibold text-foreground">Create account</h1>
+      <p className="text-sm text-muted-foreground rounded-md bg-primary/5 border border-primary/20 p-3">
+        Please register using the phone number connected to your <strong>active WhatsApp account</strong>. This is the number other community members will receive in their downloaded contact list.
+      </p>
       <div>
         <Label htmlFor="full_name">Full name</Label>
         <Input id="full_name" value={form.full_name} onChange={(e) => set("full_name", e.target.value)} required />
       </div>
       <div>
-        <Label htmlFor="phone">Phone number (with country code)</Label>
+        <Label htmlFor="phone">WhatsApp number (with country code)</Label>
         <Input id="phone" placeholder="+2348012345678" value={form.phone} onChange={(e) => set("phone", e.target.value)} required />
-      </div>
-      <div>
-        <Label htmlFor="email">Email <span className="text-muted-foreground">(optional)</span></Label>
-        <Input id="email" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
       </div>
       <div>
         <Label htmlFor="country">Country</Label>
@@ -184,6 +185,10 @@ function RegisterForm() {
       <div>
         <Label htmlFor="password">Password</Label>
         <Input id="password" type="password" value={form.password} onChange={(e) => set("password", e.target.value)} required minLength={6} />
+      </div>
+      <div>
+        <Label htmlFor="confirm_password">Confirm password</Label>
+        <Input id="confirm_password" type="password" value={form.confirm_password} onChange={(e) => set("confirm_password", e.target.value)} required minLength={6} />
       </div>
       <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Register"}</Button>
       <p className="text-sm text-center text-muted-foreground">
@@ -194,18 +199,22 @@ function RegisterForm() {
 }
 
 function ResetForm() {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
+      const p = normalizePhone(phone);
+      phoneSchema.parse(p);
+      const { data: emailData } = await supabase.rpc("email_for_phone", { _phone: p });
+      const email = (emailData as string | null) || syntheticEmail(p);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast.success("If an account exists for that email, a reset link has been sent.");
+      toast.success("If an account exists for that number, a reset link has been sent.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send reset");
     } finally {
@@ -216,10 +225,10 @@ function ResetForm() {
   return (
     <form onSubmit={submit} className="space-y-4">
       <h1 className="text-xl font-semibold text-foreground">Reset password</h1>
-      <p className="text-sm text-muted-foreground">Enter the email you used at registration. Password reset requires a valid email address on file.</p>
+      <p className="text-sm text-muted-foreground">Enter the WhatsApp number you registered with.</p>
       <div>
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Label htmlFor="phone">WhatsApp number</Label>
+        <Input id="phone" placeholder="+2348012345678" value={phone} onChange={(e) => setPhone(e.target.value)} required />
       </div>
       <Button type="submit" className="w-full" disabled={busy}>{busy ? "Sending…" : "Send reset link"}</Button>
       <p className="text-sm text-center">

@@ -108,6 +108,7 @@ export type Database = {
           last_download_version_number: number
           phone: string
           registration_date: string
+          status: Database["public"]["Enums"]["user_status"]
           total_contacts_received: number
           updated_at: string
           user_code: string
@@ -125,6 +126,7 @@ export type Database = {
           last_download_version_number?: number
           phone: string
           registration_date?: string
+          status?: Database["public"]["Enums"]["user_status"]
           total_contacts_received?: number
           updated_at?: string
           user_code: string
@@ -142,6 +144,7 @@ export type Database = {
           last_download_version_number?: number
           phone?: string
           registration_date?: string
+          status?: Database["public"]["Enums"]["user_status"]
           total_contacts_received?: number
           updated_at?: string
           user_code?: string
@@ -212,6 +215,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      user_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -340,6 +344,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      user_status: ["pending", "approved", "rejected", "suspended"],
     },
   },
 } as const

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Shield } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, History } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -39,6 +39,9 @@ function ProtectedLayout() {
           <nav className="flex items-center gap-1">
             <Link to="/dashboard">
               <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Dashboard</span></Button>
+            </Link>
+            <Link to="/download-history">
+              <Button variant="ghost" size="sm"><History className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">History</span></Button>
             </Link>
             {isAdmin && (
               <Link to="/admin">

@@ -1,22 +1,26 @@
 export interface VcfContact {
-  user_code: string;
+  contact_seq: number;
   phone: string;
+}
+
+function formatName(seq: number) {
+  return `Status Connect ${seq.toString().padStart(6, "0")}`;
 }
 
 // VCF 3.0 valid for Android / Google Contacts import.
 export function generateVcf(contacts: VcfContact[]): string {
-  // Dedupe by phone
   const seen = new Set<string>();
   const lines: string[] = [];
   for (const c of contacts) {
     const phone = c.phone.trim();
     if (!phone || seen.has(phone)) continue;
     seen.add(phone);
+    const name = formatName(c.contact_seq);
     lines.push(
       "BEGIN:VCARD",
       "VERSION:3.0",
-      `N:${c.user_code};;;;`,
-      `FN:${c.user_code}`,
+      `N:${name};;;;`,
+      `FN:${name}`,
       `TEL;TYPE=CELL:${phone}`,
       "END:VCARD",
     );
