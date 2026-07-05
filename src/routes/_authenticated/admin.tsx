@@ -167,7 +167,7 @@ function AdminPage() {
     setActivity((act as Activity[]) ?? []);
   }
 
-  useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
+  useEffect(() => { if (isAdmin && unlocked) load(); }, [isAdmin, unlocked]);
 
   async function publish() {
     setPublishing(true);
