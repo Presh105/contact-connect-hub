@@ -11,6 +11,46 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
+// Change this passcode any time — it is required in addition to being the admin phone.
+const ADMIN_PASSCODE = "SC-ADMIN-2026";
+const ADMIN_PHONE = "09130762056";
+const GATE_KEY = "sc_admin_gate_ok";
+
+function AdminGate({ onUnlock }: { onUnlock: () => void }) {
+  const [code, setCode] = useState("");
+  return (
+    <div className="max-w-sm mx-auto py-16 space-y-4">
+      <h1 className="text-2xl font-semibold text-foreground">Admin access</h1>
+      <p className="text-sm text-muted-foreground">Enter the admin passcode to continue.</p>
+      <Input
+        type="password"
+        placeholder="Passcode"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            if (code === ADMIN_PASSCODE) {
+              sessionStorage.setItem(GATE_KEY, "1");
+              onUnlock();
+            } else toast.error("Incorrect passcode");
+          }
+        }}
+      />
+      <Button
+        className="w-full"
+        onClick={() => {
+          if (code === ADMIN_PASSCODE) {
+            sessionStorage.setItem(GATE_KEY, "1");
+            onUnlock();
+          } else toast.error("Incorrect passcode");
+        }}
+      >
+        Unlock
+      </Button>
+    </div>
+  );
+}
+
 type Status = "pending" | "approved" | "rejected" | "suspended";
 
 interface AdminStats {
