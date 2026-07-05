@@ -85,7 +85,7 @@ interface Activity {
 }
 
 function AdminPage() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -93,21 +93,14 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [publishing, setPublishing] = useState(false);
-  const [myPhone, setMyPhone] = useState<string | null>(null);
   const [unlocked, setUnlocked] = useState(() =>
     typeof window !== "undefined" && sessionStorage.getItem(GATE_KEY) === "1",
   );
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("phone").eq("id", user.id).maybeSingle().then(({ data }) => {
-      setMyPhone(data?.phone ?? null);
-    });
-  }, [user?.id]);
+    if (!loading && !user) navigate({ to: "/auth" });
+  }, [loading, user, navigate]);
 
-  useEffect(() => {
-    if (!loading && !isAdmin) navigate({ to: "/dashboard" });
-  }, [loading, isAdmin, navigate]);
 
 
   async function load() {
