@@ -85,7 +85,7 @@ interface Activity {
 }
 
 function AdminPage() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -93,21 +93,14 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [publishing, setPublishing] = useState(false);
-  const [myPhone, setMyPhone] = useState<string | null>(null);
   const [unlocked, setUnlocked] = useState(() =>
     typeof window !== "undefined" && sessionStorage.getItem(GATE_KEY) === "1",
   );
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("phone").eq("id", user.id).maybeSingle().then(({ data }) => {
-      setMyPhone(data?.phone ?? null);
-    });
-  }, [user?.id]);
+    if (!loading && !user) navigate({ to: "/auth" });
+  }, [loading, user, navigate]);
 
-  useEffect(() => {
-    if (!loading && !isAdmin) navigate({ to: "/dashboard" });
-  }, [loading, isAdmin, navigate]);
 
 
   async function load() {
@@ -167,7 +160,7 @@ function AdminPage() {
     setActivity((act as Activity[]) ?? []);
   }
 
-  useEffect(() => { if (isAdmin && unlocked) load(); }, [isAdmin, unlocked]);
+  useEffect(() => { if (user && unlocked) load(); }, [user?.id, unlocked]);
 
   async function publish() {
     setPublishing(true);
@@ -217,15 +210,7 @@ function AdminPage() {
     return u.user_code.toLowerCase().includes(s) || u.full_name.toLowerCase().includes(s) || u.phone.includes(s);
   });
 
-  if (loading || !isAdmin) return <p className="text-sm text-muted-foreground">Loading…</p>;
-  if (myPhone !== null && myPhone !== ADMIN_PHONE) {
-    return (
-      <div className="max-w-md mx-auto py-16 text-center space-y-3">
-        <h1 className="text-xl font-semibold text-foreground">Not authorized</h1>
-        <p className="text-sm text-muted-foreground">This admin dashboard is restricted.</p>
-      </div>
-    );
-  }
+  if (loading || !user) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (!unlocked) return <AdminGate onUnlock={() => setUnlocked(true)} />;
   if (!stats) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
