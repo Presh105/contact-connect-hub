@@ -195,6 +195,21 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground">Your ID: <span className="font-mono">{stats.userCode}</span></p>
       </div>
 
+      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+        <p className="text-sm font-semibold text-foreground">
+          {stats.newAvailable > 0
+            ? `🎉 ${stats.newAvailable} new contact${stats.newAvailable === 1 ? "" : "s"} waiting for you!`
+            : stats.total < 10
+              ? `We're growing — ${stats.total} member${stats.total === 1 ? "" : "s"} approved so far`
+              : "You're all caught up — for now"}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {stats.newAvailable > 0
+            ? "Download now to add them to your phone. New members join every day — come back tomorrow for even more."
+            : "New members are being approved every day. Come back soon to download more WhatsApp contacts and grow your network."}
+        </p>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Approved community members" value={stats.total} />
         <StatCard label="Current version" value={`v${stats.latestVersion}`} />
