@@ -100,15 +100,26 @@ function Dashboard() {
     await logAudit(`download_${kind}`, { count });
   }
 
+  const MIN_CONTACTS = 10;
+
+  function tooFew(count: number) {
+    toast.info(
+      `Only ${count} approved contact${count === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS} before your VCF is ready — please check back in a few minutes as more members get approved.`,
+    );
+  }
+
   async function downloadFirst() {
     if (!stats) return;
     setBusy("first");
     try {
       const contacts = await fetchApprovedContacts();
-      if (contacts.length === 0) { toast.info("No approved community members yet"); return; }
-      downloadVcf(`status-connect-community-v${stats.latestVersion}.vcf`, generateVcf(contacts));
+      if (contacts.length < MIN_CONTACTS) { tooFew(contacts.length); return; }
+      downloadVcf(
+        `status-connect-community-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
+        generateVcf(contacts),
+      );
       await recordDownload("first_community", contacts.length, 0, stats.latestVersion);
-      toast.success(`Downloaded ${contacts.length} community contacts`);
+      toast.success(`Downloaded ${contacts.length} community contacts — import the .vcf to your phone`);
       load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Download failed");
@@ -121,8 +132,11 @@ function Dashboard() {
     try {
       if (stats.latestVersion <= stats.lastDownloadVersion) { toast.info("You already have the latest contacts"); return; }
       const contacts = await fetchApprovedContacts({ minVersionGt: stats.lastDownloadVersion });
-      if (contacts.length === 0) { toast.info("No new contacts"); return; }
-      downloadVcf(`status-connect-new-v${stats.lastDownloadVersion + 1}-to-v${stats.latestVersion}.vcf`, generateVcf(contacts));
+      if (contacts.length < MIN_CONTACTS) { tooFew(contacts.length); return; }
+      downloadVcf(
+        `status-connect-new-${contacts.length}contacts-v${stats.lastDownloadVersion + 1}-to-v${stats.latestVersion}.vcf`,
+        generateVcf(contacts),
+      );
       await recordDownload("new", contacts.length, stats.lastDownloadVersion, stats.latestVersion);
       toast.success(`Downloaded ${contacts.length} new contacts`);
       load();
@@ -136,8 +150,11 @@ function Dashboard() {
     setBusy("full");
     try {
       const contacts = await fetchApprovedContacts();
-      if (contacts.length === 0) { toast.info("No contacts yet"); return; }
-      downloadVcf(`status-connect-full-v${stats.latestVersion}.vcf`, generateVcf(contacts));
+      if (contacts.length < MIN_CONTACTS) { tooFew(contacts.length); return; }
+      downloadVcf(
+        `status-connect-full-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
+        generateVcf(contacts),
+      );
       await recordDownload("complete", contacts.length, 0, stats.latestVersion);
       toast.success(`Downloaded ${contacts.length} contacts`);
       load();
@@ -176,6 +193,21 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground">Welcome back</p>
         <h1 className="text-2xl font-semibold text-foreground">{stats.fullName}</h1>
         <p className="text-sm text-muted-foreground">Your ID: <span className="font-mono">{stats.userCode}</span></p>
+      </div>
+
+      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+        <p className="text-sm font-semibold text-foreground">
+          {stats.newAvailable > 0
+            ? `🎉 ${stats.newAvailable} new contact${stats.newAvailable === 1 ? "" : "s"} waiting for you!`
+            : stats.total < 10
+              ? `We're growing — ${stats.total} member${stats.total === 1 ? "" : "s"} approved so far`
+              : "You're all caught up — for now"}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {stats.newAvailable > 0
+            ? "Download now to add them to your phone. New members join every day — come back tomorrow for even more."
+            : "New members are being approved every day. Come back soon to download more WhatsApp contacts and grow your network."}
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

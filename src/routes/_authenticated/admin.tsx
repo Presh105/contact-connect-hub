@@ -11,6 +11,46 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
+// Change this passcode any time — it is required in addition to being the admin phone.
+const ADMIN_PASSCODE = "SC-ADMIN-2026";
+const ADMIN_PHONE = "09130762056";
+const GATE_KEY = "sc_admin_gate_ok";
+
+function AdminGate({ onUnlock }: { onUnlock: () => void }) {
+  const [code, setCode] = useState("");
+  return (
+    <div className="max-w-sm mx-auto py-16 space-y-4">
+      <h1 className="text-2xl font-semibold text-foreground">Admin access</h1>
+      <p className="text-sm text-muted-foreground">Enter the admin passcode to continue.</p>
+      <Input
+        type="password"
+        placeholder="Passcode"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            if (code === ADMIN_PASSCODE) {
+              sessionStorage.setItem(GATE_KEY, "1");
+              onUnlock();
+            } else toast.error("Incorrect passcode");
+          }
+        }}
+      />
+      <Button
+        className="w-full"
+        onClick={() => {
+          if (code === ADMIN_PASSCODE) {
+            sessionStorage.setItem(GATE_KEY, "1");
+            onUnlock();
+          } else toast.error("Incorrect passcode");
+        }}
+      >
+        Unlock
+      </Button>
+    </div>
+  );
+}
+
 type Status = "pending" | "approved" | "rejected" | "suspended";
 
 interface AdminStats {
@@ -45,7 +85,7 @@ interface Activity {
 }
 
 function AdminPage() {
-  const { isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -53,10 +93,22 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [publishing, setPublishing] = useState(false);
+  const [myPhone, setMyPhone] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState(() =>
+    typeof window !== "undefined" && sessionStorage.getItem(GATE_KEY) === "1",
+  );
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("phone").eq("id", user.id).maybeSingle().then(({ data }) => {
+      setMyPhone(data?.phone ?? null);
+    });
+  }, [user?.id]);
 
   useEffect(() => {
     if (!loading && !isAdmin) navigate({ to: "/dashboard" });
   }, [loading, isAdmin, navigate]);
+
 
   async function load() {
     const dayAgo = new Date(Date.now() - 86400000).toISOString();
@@ -115,7 +167,7 @@ function AdminPage() {
     setActivity((act as Activity[]) ?? []);
   }
 
-  useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
+  useEffect(() => { if (isAdmin && unlocked) load(); }, [isAdmin, unlocked]);
 
   async function publish() {
     setPublishing(true);
@@ -165,7 +217,17 @@ function AdminPage() {
     return u.user_code.toLowerCase().includes(s) || u.full_name.toLowerCase().includes(s) || u.phone.includes(s);
   });
 
-  if (loading || !isAdmin || !stats) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (loading || !isAdmin) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (myPhone !== null && myPhone !== ADMIN_PHONE) {
+    return (
+      <div className="max-w-md mx-auto py-16 text-center space-y-3">
+        <h1 className="text-xl font-semibold text-foreground">Not authorized</h1>
+        <p className="text-sm text-muted-foreground">This admin dashboard is restricted.</p>
+      </div>
+    );
+  }
+  if (!unlocked) return <AdminGate onUnlock={() => setUnlocked(true)} />;
+  if (!stats) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   return (
     <div className="space-y-6">
