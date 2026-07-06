@@ -176,21 +176,18 @@ function Dashboard() {
 
   if (!stats) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
-  if (stats.status !== "approved") {
+  if (stats.status === "suspended") {
     return (
       <div className="max-w-xl mx-auto text-center py-10 space-y-4">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Clock className="h-7 w-7" />
         </div>
         <h1 className="text-2xl font-semibold text-foreground">
-          {stats.status === "pending" && "Your account is awaiting approval"}
-          {stats.status === "rejected" && "Your account was not approved"}
-          {stats.status === "suspended" && "Your account is suspended"}
-        </h1>
+  Your account is suspended
+</h1>
         <p className="text-sm text-muted-foreground">
-          {stats.status === "pending" && "An administrator will review your registration shortly. You'll be able to download community contacts once you're approved."}
-          {stats.status !== "pending" && "Please contact an administrator for more information."}
-        </p>
+  Please contact an administrator for more information.
+</p>
         <p className="text-xs text-muted-foreground">Your ID: <span className="font-mono">{stats.userCode}</span></p>
       </div>
     );
