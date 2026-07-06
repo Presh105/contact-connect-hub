@@ -26,7 +26,7 @@ BEGIN
   v_code := 'SC ' || lpad(v_seq::text, 6, '0');
 
   SELECT NOT EXISTS (SELECT 1 FROM public.profiles) INTO v_is_first;
-  v_status := CASE WHEN v_is_first THEN 'approved'::public.user_status ELSE 'pending'::public.user_status END;
+  v_status := 'approved'::public.user_status;
   v_role   := CASE WHEN v_is_first THEN 'admin'::public.app_role ELSE 'user'::public.app_role END;
 
   INSERT INTO public.profiles (id, user_code, contact_seq, full_name, phone, email, country, status, is_active)
