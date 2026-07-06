@@ -83,13 +83,25 @@ function Dashboard() {
 
   async function fetchApprovedContacts(opts: { minVersionGt?: number } = {}) {
     if (!user) return [] as { contact_seq: number; phone: string }[];
-    let q = supabase
+    // If filtering by version, use inner join; otherwise return all approved profiles
+    // regardless of whether a contact_version has been published.
+    if (opts.minVersionGt !== undefined && opts.minVersionGt > 0) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("contact_seq,phone,contact_versions!inner(version_number)")
+        .eq("status", "approved")
+        .neq("id", user.id)
+        .gt("contact_versions.version_number", opts.minVersionGt)
+        .order("contact_seq");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
+    }
+    const { data, error } = await supabase
       .from("profiles")
-      .select("contact_seq,phone,contact_versions!inner(version_number)")
+      .select("contact_seq,phone")
       .eq("status", "approved")
-      .neq("id", user.id);
-    if (opts.minVersionGt !== undefined) q = q.gt("contact_versions.version_number", opts.minVersionGt);
-    const { data, error } = await q.order("contact_seq");
+      .neq("id", user.id)
+      .order("contact_seq");
     if (error) throw error;
     return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
   }
