@@ -41,12 +41,20 @@ function Dashboard() {
         .eq("id", user.id)
         .single(),
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved").not("version_id", "is", null),
+      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved"),
     ]);
     const latest = latestV?.version_number ?? 0;
     const lastDl = profile?.last_download_version_number ?? 0;
     let newAvailable = 0;
-    if (latest > lastDl) {
+    if (lastDl === 0) {
+      // Never downloaded — all approved contacts (except self) are new
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "approved")
+        .neq("id", user.id);
+      newAvailable = count ?? 0;
+    } else if (latest > lastDl) {
       const { count } = await supabase
         .from("profiles")
         .select("id,contact_versions!inner(version_number)", { count: "exact", head: true })
@@ -75,13 +83,25 @@ function Dashboard() {
 
   async function fetchApprovedContacts(opts: { minVersionGt?: number } = {}) {
     if (!user) return [] as { contact_seq: number; phone: string }[];
-    let q = supabase
+    // If filtering by version, use inner join; otherwise return all approved profiles
+    // regardless of whether a contact_version has been published.
+    if (opts.minVersionGt !== undefined && opts.minVersionGt > 0) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("contact_seq,phone,contact_versions!inner(version_number)")
+        .eq("status", "approved")
+        .neq("id", user.id)
+        .gt("contact_versions.version_number", opts.minVersionGt)
+        .order("contact_seq");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
+    }
+    const { data, error } = await supabase
       .from("profiles")
-      .select("contact_seq,phone,contact_versions!inner(version_number)")
+      .select("contact_seq,phone")
       .eq("status", "approved")
-      .neq("id", user.id);
-    if (opts.minVersionGt !== undefined) q = q.gt("contact_versions.version_number", opts.minVersionGt);
-    const { data, error } = await q.order("contact_seq");
+      .neq("id", user.id)
+      .order("contact_seq");
     if (error) throw error;
     return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
   }
