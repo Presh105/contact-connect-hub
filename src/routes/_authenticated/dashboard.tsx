@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,14 @@ interface Stats {
   isFirstDownload: boolean;
 }
 
+const MIN_CONTACTS = 5;
+
 function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [busy, setBusy] = useState<null | "first" | "new" | "full">(null);
+  const [busy, setBusy] = useState<null | "new" | "full">(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!user) return;
     const [{ data: profile }, { data: latestV }, { count: totalApproved }] = await Promise.all([
       supabase
@@ -41,61 +43,69 @@ function Dashboard() {
         .eq("id", user.id)
         .single(),
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved"),
+      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved").neq("id", user.id),
     ]);
     const latest = latestV?.version_number ?? 0;
     const lastDl = profile?.last_download_version_number ?? 0;
-    let newAvailable = 0;
-    if (lastDl === 0) {
-      // Never downloaded — all approved contacts (except self) are new
-      const { count } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "approved")
-        .neq("id", user.id);
-      newAvailable = count ?? 0;
-    } else if (latest > lastDl) {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id,contact_versions!inner(version_number)", { count: "exact", head: true })
-        .eq("status", "approved")
-        .gt("contact_versions.version_number", lastDl)
-        .neq("id", user.id);
-      newAvailable = count ?? 0;
-    }
+    const lastDlDate = profile?.last_download_date ?? null;
+
+    // "New" = approved contacts (excluding self) added since user's last download.
+    // If the user has never downloaded, everyone approved is new.
+    let newQ = supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "approved")
+      .neq("id", user.id);
+    if (lastDlDate) newQ = newQ.gt("registration_date", lastDlDate);
+    const { count: newCount } = await newQ;
+
     setStats({
       total: totalApproved ?? 0,
       downloaded: profile?.total_contacts_received ?? 0,
-      newAvailable,
+      newAvailable: newCount ?? 0,
       lastUpdate: latestV?.created_at ?? null,
       latestVersion: latest,
       lastDownloadVersion: lastDl,
-      lastDownloadDate: profile?.last_download_date ?? null,
+      lastDownloadDate: lastDlDate,
       userCode: profile?.user_code ?? "",
       fullName: profile?.full_name ?? "",
       status: (profile?.status as Stats["status"]) ?? "pending",
       registrationDate: profile?.registration_date ?? "",
-      isFirstDownload: lastDl === 0,
+      isFirstDownload: !lastDlDate,
     });
+  }, [user]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Realtime: refresh when approvals happen, new versions publish, or this user's downloads change.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("dashboard-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "contact_versions" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "downloads", filter: `user_id=eq.${user.id}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, load]);
+
+  async function fetchNewContacts() {
+    if (!user) return [] as { contact_seq: number; phone: string }[];
+    let q = supabase
+      .from("profiles")
+      .select("contact_seq,phone,registration_date")
+      .eq("status", "approved")
+      .neq("id", user.id);
+    if (stats?.lastDownloadDate) q = q.gt("registration_date", stats.lastDownloadDate);
+    const { data, error } = await q.order("contact_seq");
+    if (error) throw error;
+    return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
   }
 
-  useEffect(() => { load(); }, [user?.id]);
-
-  async function fetchApprovedContacts(opts: { minVersionGt?: number } = {}) {
+  async function fetchAllApproved() {
     if (!user) return [] as { contact_seq: number; phone: string }[];
-    // If filtering by version, use inner join; otherwise return all approved profiles
-    // regardless of whether a contact_version has been published.
-    if (opts.minVersionGt !== undefined && opts.minVersionGt > 0) {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("contact_seq,phone,contact_versions!inner(version_number)")
-        .eq("status", "approved")
-        .neq("id", user.id)
-        .gt("contact_versions.version_number", opts.minVersionGt)
-        .order("contact_seq");
-      if (error) throw error;
-      return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
-    }
     const { data, error } = await supabase
       .from("profiles")
       .select("contact_seq,phone")
@@ -120,45 +130,23 @@ function Dashboard() {
     await logAudit(`download_${kind}`, { count });
   }
 
-  const MIN_CONTACTS = 10;
-
-  function tooFew(count: number) {
-    toast.info(
-      `Only ${count} approved contact${count === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS} before your VCF is ready — please check back in a few minutes as more members get approved.`,
-    );
-  }
-
-  async function downloadFirst() {
-    if (!stats) return;
-    setBusy("first");
-    try {
-      const contacts = await fetchApprovedContacts();
-      if (contacts.length < MIN_CONTACTS) { tooFew(contacts.length); return; }
-      downloadVcf(
-        `status-connect-community-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
-        generateVcf(contacts),
-      );
-      await recordDownload("first_community", contacts.length, 0, stats.latestVersion);
-      toast.success(`Downloaded ${contacts.length} community contacts — import the .vcf to your phone`);
-      load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed");
-    } finally { setBusy(null); }
-  }
-
   async function downloadNew() {
     if (!stats) return;
     setBusy("new");
     try {
-      if (stats.latestVersion <= stats.lastDownloadVersion) { toast.info("You already have the latest contacts"); return; }
-      const contacts = await fetchApprovedContacts({ minVersionGt: stats.lastDownloadVersion });
-      if (contacts.length < MIN_CONTACTS) { tooFew(contacts.length); return; }
+      const contacts = await fetchNewContacts();
+      if (contacts.length < MIN_CONTACTS) {
+        toast.info(`Only ${contacts.length} new contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS} — please check back soon.`);
+        return;
+      }
+      const kind: "first_community" | "new" = stats.isFirstDownload ? "first_community" : "new";
+      const label = stats.isFirstDownload ? "community" : "new";
       downloadVcf(
-        `status-connect-new-${contacts.length}contacts-v${stats.lastDownloadVersion + 1}-to-v${stats.latestVersion}.vcf`,
+        `status-connect-${label}-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
         generateVcf(contacts),
       );
-      await recordDownload("new", contacts.length, stats.lastDownloadVersion, stats.latestVersion);
-      toast.success(`Downloaded ${contacts.length} new contacts`);
+      await recordDownload(kind, contacts.length, stats.lastDownloadVersion, Math.max(stats.latestVersion, stats.lastDownloadVersion));
+      toast.success(`Downloaded ${contacts.length} new contacts — import the .vcf to your phone`);
       load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Download failed");
@@ -169,8 +157,11 @@ function Dashboard() {
     if (!stats) return;
     setBusy("full");
     try {
-      const contacts = await fetchApprovedContacts();
-      if (contacts.length < MIN_CONTACTS) { tooFew(contacts.length); return; }
+      const contacts = await fetchAllApproved();
+      if (contacts.length < MIN_CONTACTS) {
+        toast.info(`Only ${contacts.length} approved contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS}.`);
+        return;
+      }
       downloadVcf(
         `status-connect-full-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
         generateVcf(contacts),
@@ -205,6 +196,7 @@ function Dashboard() {
     );
   }
 
+  const canDownloadNew = stats.newAvailable >= MIN_CONTACTS;
   const noDownloadable = stats.total === 0;
 
   return (
@@ -216,18 +208,23 @@ function Dashboard() {
       </div>
 
       <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
-        <p className="text-sm font-semibold text-foreground">
-          {stats.newAvailable > 0
-            ? `🎉 ${stats.newAvailable} new contact${stats.newAvailable === 1 ? "" : "s"} waiting for you!`
-            : stats.total < 10
-              ? `We're growing — ${stats.total} member${stats.total === 1 ? "" : "s"} approved so far`
-              : "You're all caught up — for now"}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {stats.newAvailable > 0
-            ? "Download now to add them to your phone. New members join every day — come back tomorrow for even more."
-            : "New members are being approved every day. Come back soon to download more WhatsApp contacts and grow your network."}
-        </p>
+        <p className="text-xs uppercase tracking-wide text-primary font-semibold">Contacts Ready to Save</p>
+        {stats.newAvailable > 0 ? (
+          <>
+            <p className="text-2xl font-semibold text-foreground">
+              {stats.newAvailable} new contact{stats.newAvailable === 1 ? "" : "s"} available
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {canDownloadNew
+                ? "Tap Download Community Contacts below to add them to your phone."
+                : `${MIN_CONTACTS - stats.newAvailable} more needed before your next download unlocks.`}
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-foreground">
+            Please return in 30 minutes to check for newly approved community members.
+          </p>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -242,27 +239,14 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.isFirstDownload ? (
-          <Button size="lg" onClick={downloadFirst} disabled={busy !== null || noDownloadable} className="sm:col-span-2 lg:col-span-1">
-            <Sparkles className="h-4 w-4 mr-2" />
-            {busy === "first" ? "Preparing…" : "Download Community Contacts"}
-          </Button>
-        ) : (
-          <Button size="lg" onClick={downloadNew} disabled={busy !== null || stats.newAvailable === 0}>
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            {busy === "new" ? "Preparing…" : `Download New${stats.newAvailable > 0 ? ` (${stats.newAvailable})` : ""}`}
-          </Button>
-        )}
+        <Button size="lg" onClick={downloadNew} disabled={busy !== null || !canDownloadNew} className="sm:col-span-2 lg:col-span-1">
+          {stats.isFirstDownload ? <Sparkles className="h-4 w-4 mr-2" /> : <RefreshCcw className="h-4 w-4 mr-2" />}
+          {busy === "new" ? "Preparing…" : `Download Community Contacts${stats.newAvailable > 0 ? ` (${stats.newAvailable})` : ""}`}
+        </Button>
         <Button size="lg" variant="outline" onClick={downloadFull} disabled={busy !== null || noDownloadable}>
           <Download className="h-4 w-4 mr-2" />
           {busy === "full" ? "Preparing…" : "Download Complete List"}
         </Button>
-        {!stats.isFirstDownload && (
-          <Button size="lg" variant="outline" onClick={downloadNew} disabled={busy !== null || stats.newAvailable === 0}>
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            New contacts
-          </Button>
-        )}
         <Link to="/download-history">
           <Button size="lg" variant="ghost" className="w-full">
             <History className="h-4 w-4 mr-2" /> Download History
@@ -271,7 +255,7 @@ function Dashboard() {
       </div>
 
       <div className="rounded-lg border border-border bg-card p-4 text-xs text-muted-foreground">
-        Import the downloaded .vcf file in your phone's Contacts app to add every approved community member. Your own number is never included in your own file.
+        Import the downloaded .vcf file in your phone's Contacts app to add every approved community member. Your own number is never included in your own file, and contacts you've already downloaded are never repeated.
       </div>
     </div>
   );
