@@ -41,12 +41,20 @@ function Dashboard() {
         .eq("id", user.id)
         .single(),
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved").not("version_id", "is", null),
+      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved"),
     ]);
     const latest = latestV?.version_number ?? 0;
     const lastDl = profile?.last_download_version_number ?? 0;
     let newAvailable = 0;
-    if (latest > lastDl) {
+    if (lastDl === 0) {
+      // Never downloaded — all approved contacts (except self) are new
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "approved")
+        .neq("id", user.id);
+      newAvailable = count ?? 0;
+    } else if (latest > lastDl) {
       const { count } = await supabase
         .from("profiles")
         .select("id,contact_versions!inner(version_number)", { count: "exact", head: true })
