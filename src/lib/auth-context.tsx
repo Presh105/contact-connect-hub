@@ -22,10 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       if (s?.user) {
-        // check admin role (deferred)
+        // check admin role + record login (deferred to avoid blocking the auth callback)
         setTimeout(async () => {
           const { data } = await supabase
             .from("user_roles")
@@ -34,6 +34,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .eq("role", "admin")
             .maybeSingle();
           setIsAdmin(!!data);
+          if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
+            await supabase.rpc("record_login");
+            // Opportunistic sweep so inactive-user status stays fresh without an admin cron.
+            await supabase.rpc("sweep_inactive_users");
+          }
         }, 0);
       } else {
         setIsAdmin(false);
