@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Download, RefreshCcw, History, Sparkles, Clock } from "lucide-react";
+import { Download, RefreshCcw, History, Sparkles, Clock, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { generateVcf, downloadVcf } from "@/lib/vcf";
 import { logAudit } from "@/lib/audit";
@@ -27,114 +27,186 @@ interface Stats {
   isFirstDownload: boolean;
 }
 
+interface Downloader {
+  id: string;
+  downloaded_at: string;
+  phone: string;
+  user_code: string;
+}
+
 const MIN_CONTACTS = 5;
+
+function maskPhone(p: string) {
+  const s = p.trim();
+  if (s.length <= 4) return "•••" + s;
+  return s.slice(0, Math.min(4, s.length - 4)) + "••••" + s.slice(-2);
+}
 
 function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [busy, setBusy] = useState<null | "new" | "full">(null);
+  const [downloaders, setDownloaders] = useState<Downloader[]>([]);
 
   const load = useCallback(async () => {
     if (!user) return;
-    const [{ data: profile }, { data: latestV }, { count: totalApproved }] = await Promise.all([
+
+    // Profile + latest version + total active approved (excluding self)
+    const [{ data: profile }, { data: latestV }, { count: totalActive }] = await Promise.all([
       supabase
         .from("profiles")
         .select("user_code,full_name,last_download_version_number,last_download_date,total_contacts_received,status,registration_date")
         .eq("id", user.id)
         .single(),
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved").neq("id", user.id),
+      supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "approved")
+        .eq("is_active", true)
+        .neq("id", user.id),
     ]);
-    const latest = latestV?.version_number ?? 0;
-    const lastDl = profile?.last_download_version_number ?? 0;
-    const lastDlDate = profile?.last_download_date ?? null;
 
-    // "New" = approved contacts (excluding self) added since user's last download.
-    // If the user has never downloaded, everyone approved is new.
-    let newQ = supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "approved")
-      .neq("id", user.id);
-    if (lastDlDate) newQ = newQ.gt("registration_date", lastDlDate);
-    const { count: newCount } = await newQ;
+    // IDs already delivered to this user (so we can compute new-available)
+    const { data: delivered } = await supabase
+      .from("user_downloaded_contacts")
+      .select("contact_id")
+      .eq("user_id", user.id);
+    const deliveredIds = new Set((delivered ?? []).map((r) => r.contact_id as string));
+
+    // Count active approved contacts NOT yet delivered
+    let newCount = 0;
+    if (deliveredIds.size === 0) {
+      newCount = totalActive ?? 0;
+    } else {
+      // Fetch only ids of active approved (excluding self), diff locally.
+      const { data: candidates } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("status", "approved")
+        .eq("is_active", true)
+        .neq("id", user.id);
+      newCount = (candidates ?? []).filter((r) => !deliveredIds.has(r.id as string)).length;
+    }
 
     setStats({
-      total: totalApproved ?? 0,
+      total: totalActive ?? 0,
       downloaded: profile?.total_contacts_received ?? 0,
-      newAvailable: newCount ?? 0,
+      newAvailable: newCount,
       lastUpdate: latestV?.created_at ?? null,
-      latestVersion: latest,
-      lastDownloadVersion: lastDl,
-      lastDownloadDate: lastDlDate,
+      latestVersion: latestV?.version_number ?? 0,
+      lastDownloadVersion: profile?.last_download_version_number ?? 0,
+      lastDownloadDate: profile?.last_download_date ?? null,
       userCode: profile?.user_code ?? "",
       fullName: profile?.full_name ?? "",
       status: (profile?.status as Stats["status"]) ?? "pending",
       registrationDate: profile?.registration_date ?? "",
-      isFirstDownload: !lastDlDate,
+      isFirstDownload: deliveredIds.size === 0,
     });
+
+    // Downloaders of this user's contact (notifications)
+    const { data: dlRows } = await supabase
+      .from("user_downloaded_contacts")
+      .select("id,downloaded_at,user_id")
+      .eq("contact_id", user.id)
+      .order("downloaded_at", { ascending: false })
+      .limit(100);
+    const ids = Array.from(new Set((dlRows ?? []).map((r) => r.user_id as string)));
+    let profilesById = new Map<string, { phone: string; user_code: string }>();
+    if (ids.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,phone,user_code")
+        .in("id", ids);
+      profilesById = new Map((profs ?? []).map((p) => [p.id as string, { phone: p.phone as string, user_code: p.user_code as string }]));
+    }
+    setDownloaders(
+      (dlRows ?? []).map((r) => {
+        const p = profilesById.get(r.user_id as string);
+        return {
+          id: r.id as string,
+          downloaded_at: r.downloaded_at as string,
+          phone: p?.phone ?? "",
+          user_code: p?.user_code ?? "—",
+        };
+      }),
+    );
   }, [user]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  // Realtime: refresh when approvals happen, new versions publish, or this user's downloads change.
+  // Realtime updates
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("dashboard-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "contact_versions" }, () => load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "downloads", filter: `user_id=eq.${user.id}` }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_downloaded_contacts" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, load]);
 
-  async function fetchNewContacts() {
-    if (!user) return [] as { contact_seq: number; phone: string }[];
+  async function fetchUndeliveredContacts() {
+    if (!user) return [] as { id: string; contact_seq: number; phone: string }[];
+    const { data: delivered } = await supabase
+      .from("user_downloaded_contacts")
+      .select("contact_id")
+      .eq("user_id", user.id);
+    const deliveredIds = (delivered ?? []).map((r) => r.contact_id as string);
+
     let q = supabase
       .from("profiles")
-      .select("contact_seq,phone,registration_date")
+      .select("id,contact_seq,phone")
       .eq("status", "approved")
+      .eq("is_active", true)
       .neq("id", user.id);
-    if (stats?.lastDownloadDate) q = q.gt("registration_date", stats.lastDownloadDate);
+    if (deliveredIds.length) {
+      q = q.not("id", "in", `(${deliveredIds.join(",")})`);
+    }
     const { data, error } = await q.order("contact_seq");
     if (error) throw error;
-    return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
+    return (data ?? []).map((r) => ({
+      id: r.id as string,
+      contact_seq: r.contact_seq as number,
+      phone: r.phone as string,
+    }));
   }
 
-  async function fetchAllApproved() {
-    if (!user) return [] as { contact_seq: number; phone: string }[];
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("contact_seq,phone")
-      .eq("status", "approved")
-      .neq("id", user.id)
-      .order("contact_seq");
-    if (error) throw error;
-    return (data ?? []).map((r) => ({ contact_seq: r.contact_seq as number, phone: r.phone as string }));
-  }
-
-  async function recordDownload(kind: "first_community" | "new" | "complete", count: number, from: number, to: number) {
-    if (!user || !stats) return;
+  async function recordDelivery(contacts: { id: string }[], kind: "first_community" | "new" | "complete") {
+    if (!user || !stats || contacts.length === 0) return;
+    // Insert delivery rows (unique constraint dedupes)
+    const rows = contacts.map((c) => ({ user_id: user.id, contact_id: c.id }));
+    // Chunk to keep payload small
+    const CHUNK = 500;
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      await supabase.from("user_downloaded_contacts").upsert(rows.slice(i, i + CHUNK), {
+        onConflict: "user_id,contact_id",
+        ignoreDuplicates: true,
+      });
+    }
     await supabase.from("downloads").insert({
-      user_id: user.id, download_type: kind,
-      from_version: from, to_version: to, contact_count: count,
+      user_id: user.id,
+      download_type: kind,
+      from_version: stats.lastDownloadVersion,
+      to_version: Math.max(stats.latestVersion, stats.lastDownloadVersion),
+      contact_count: contacts.length,
     });
     await supabase.from("profiles").update({
-      last_download_version_number: Math.max(stats.lastDownloadVersion, to),
+      last_download_version_number: Math.max(stats.lastDownloadVersion, stats.latestVersion),
       last_download_date: new Date().toISOString(),
-      total_contacts_received: stats.downloaded + count,
+      total_contacts_received: stats.downloaded + contacts.length,
     }).eq("id", user.id);
-    await logAudit(`download_${kind}`, { count });
+    await logAudit(`download_${kind}`, { count: contacts.length });
   }
 
   async function downloadNew() {
     if (!stats) return;
     setBusy("new");
     try {
-      const contacts = await fetchNewContacts();
+      const contacts = await fetchUndeliveredContacts();
       if (contacts.length < MIN_CONTACTS) {
         toast.info(`Only ${contacts.length} new contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS} — please check back soon.`);
         return;
@@ -145,7 +217,7 @@ function Dashboard() {
         `status-connect-${label}-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
         generateVcf(contacts),
       );
-      await recordDownload(kind, contacts.length, stats.lastDownloadVersion, Math.max(stats.latestVersion, stats.lastDownloadVersion));
+      await recordDelivery(contacts, kind);
       toast.success(`Downloaded ${contacts.length} new contacts — import the .vcf to your phone`);
       load();
     } catch (err) {
@@ -154,10 +226,22 @@ function Dashboard() {
   }
 
   async function downloadFull() {
-    if (!stats) return;
+    if (!stats || !user) return;
     setBusy("full");
     try {
-      const contacts = await fetchAllApproved();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id,contact_seq,phone")
+        .eq("status", "approved")
+        .eq("is_active", true)
+        .neq("id", user.id)
+        .order("contact_seq");
+      if (error) throw error;
+      const contacts = (data ?? []).map((r) => ({
+        id: r.id as string,
+        contact_seq: r.contact_seq as number,
+        phone: r.phone as string,
+      }));
       if (contacts.length < MIN_CONTACTS) {
         toast.info(`Only ${contacts.length} approved contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS}.`);
         return;
@@ -166,7 +250,7 @@ function Dashboard() {
         `status-connect-full-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
         generateVcf(contacts),
       );
-      await recordDownload("complete", contacts.length, 0, stats.latestVersion);
+      await recordDelivery(contacts, "complete");
       toast.success(`Downloaded ${contacts.length} contacts`);
       load();
     } catch (err) {
@@ -182,12 +266,8 @@ function Dashboard() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Clock className="h-7 w-7" />
         </div>
-        <h1 className="text-2xl font-semibold text-foreground">
-  Your account is suspended
-</h1>
-        <p className="text-sm text-muted-foreground">
-  Please contact an administrator for more information.
-</p>
+        <h1 className="text-2xl font-semibold text-foreground">Your account is suspended</h1>
+        <p className="text-sm text-muted-foreground">Please contact an administrator for more information.</p>
         <p className="text-xs text-muted-foreground">Your ID: <span className="font-mono">{stats.userCode}</span></p>
       </div>
     );
@@ -249,6 +329,33 @@ function Dashboard() {
             <History className="h-4 w-4 mr-2" /> Download History
           </Button>
         </Link>
+      </div>
+
+      <div className="rounded-lg border border-border bg-card">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Bell className="h-4 w-4 text-primary" />
+            <h2 className="font-semibold text-foreground">Who saved your contact</h2>
+          </div>
+          <span className="text-sm font-semibold text-primary">{downloaders.length}</span>
+        </div>
+        {downloaders.length === 0 ? (
+          <p className="p-4 text-sm text-muted-foreground">
+            No one has downloaded your contact yet. Once community members save your number, you'll see them listed here.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {downloaders.map((d) => (
+              <li key={d.id} className="flex items-center justify-between p-4 text-sm">
+                <div>
+                  <p className="font-mono text-foreground">{maskPhone(d.phone)}</p>
+                  <p className="text-xs text-muted-foreground">ID {d.user_code}</p>
+                </div>
+                <span className="text-xs text-muted-foreground">{new Date(d.downloaded_at).toLocaleString()}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="rounded-lg border border-border bg-card p-4 text-xs text-muted-foreground">
