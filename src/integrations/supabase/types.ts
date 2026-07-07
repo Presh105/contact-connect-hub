@@ -106,6 +106,7 @@ export type Database = {
           is_active: boolean
           last_download_date: string | null
           last_download_version_number: number
+          last_login_at: string | null
           phone: string
           registration_date: string
           status: Database["public"]["Enums"]["user_status"]
@@ -124,6 +125,7 @@ export type Database = {
           is_active?: boolean
           last_download_date?: string | null
           last_download_version_number?: number
+          last_login_at?: string | null
           phone: string
           registration_date?: string
           status?: Database["public"]["Enums"]["user_status"]
@@ -142,6 +144,7 @@ export type Database = {
           is_active?: boolean
           last_download_date?: string | null
           last_download_version_number?: number
+          last_login_at?: string | null
           phone?: string
           registration_date?: string
           status?: Database["public"]["Enums"]["user_status"]
@@ -156,6 +159,35 @@ export type Database = {
             columns: ["version_id"]
             isOneToOne: false
             referencedRelation: "contact_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_downloaded_contacts: {
+        Row: {
+          contact_id: string
+          downloaded_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          contact_id: string
+          downloaded_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          contact_id?: string
+          downloaded_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_downloaded_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -212,6 +244,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      record_login: { Args: never; Returns: undefined }
+      sweep_inactive_users: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "user"
