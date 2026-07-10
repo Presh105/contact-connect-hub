@@ -7,4 +7,4 @@ Disallow: /download-history
 Disallow: /reset-password
 Disallow: /auth
 
-Sitemap: /sitemap.xml
+Sitemap: https://statusconnect.com.ng/sitemap.xml
