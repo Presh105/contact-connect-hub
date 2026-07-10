@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = ""; // resolved against request host by crawlers
+const BASE_URL = "https://statusconnect.com.ng"; // resolved against request host by crawlers
 
 interface SitemapEntry {
   path: string;
