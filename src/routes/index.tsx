@@ -265,7 +265,65 @@ function Landing() {
           </div>
         </section>
 
-        {/* WHO IS IT FOR */}
+        {/* TUTORIAL VIDEO */}
+        <section id="tutorial" className="border-t border-border">
+          <div className="mx-auto max-w-4xl px-4 py-14 md:py-20">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Watch: How to Use Status Connect</h2>
+              <p className="mt-2 text-muted-foreground">A short walkthrough — register, get approved, download the VCF file and import it into your phone.</p>
+            </div>
+            {TUTORIAL_VIDEO_URL ? (
+              <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border shadow-lg">
+                <iframe
+                  src={TUTORIAL_VIDEO_URL}
+                  title="How to use Status Connect — tutorial video"
+                  className="h-full w-full"
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
+                <PlayCircle className="mx-auto h-10 w-10 text-primary" aria-hidden />
+                <p className="mt-3 font-medium text-foreground">Tutorial video coming soon</p>
+                <p className="mt-1 text-sm text-muted-foreground">In the meantime, the seven steps above walk you through the whole process.</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* MEMBERSHIP */}
+        <section id="membership" className="border-t border-border bg-muted/30">
+          <div className="mx-auto max-w-4xl px-4 py-14 md:py-20">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Freemium and Premium Membership</h2>
+              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">Everyone starts free. Premium unlocks unfiltered downloads and your reciprocal network.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-border bg-card p-6">
+                <h3 className="font-semibold text-foreground">Freemium</h3>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  <li>• Free registration and community access</li>
+                  <li>• Download verified community contacts</li>
+                  <li>• With your permission, numbers already on your phone are skipped so files stay small</li>
+                  <li>• StatusConnect-Administrator numbers included</li>
+                </ul>
+              </div>
+              <div className="rounded-xl border-2 border-primary bg-card p-6">
+                <h3 className="font-semibold text-foreground">Premium</h3>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  <li>• Full unfiltered contact downloads</li>
+                  <li>• Export your reciprocal network — members who confirmed saving your number</li>
+                  <li>• See full details of members who saved you</li>
+                  <li>• Priority approval and support</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
         <section id="who" className="border-t border-border">
           <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
             <div className="text-center mb-10">
@@ -346,6 +404,30 @@ function Landing() {
           </div>
         </section>
 
+        {/* BLOG */}
+        <section id="blog" className="border-t border-border bg-muted/30">
+          <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">WhatsApp Growth Guides</h2>
+              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">Original, practical articles on Status marketing, VCF imports and safe WhatsApp promotion in Nigeria.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {BLOG_POSTS.slice(0, 3).map((p) => (
+                <article key={p.slug} className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{p.readMinutes} min read</p>
+                  <h3 className="mt-2 font-semibold text-foreground">
+                    <Link to="/blog/$slug" params={{ slug: p.slug }} className="hover:text-primary">{p.title}</Link>
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{p.description}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Link to="/blog"><Button variant="outline" className="rounded-full px-6">Read all articles</Button></Link>
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="border-t border-border bg-primary text-primary-foreground">
           <div className="mx-auto max-w-4xl px-4 py-14 md:py-20 text-center">
@@ -371,7 +453,9 @@ function Landing() {
           </div>
           <nav aria-label="Footer" className="flex gap-4">
             <a href="#how-it-works" className="hover:text-foreground">How it works</a>
-            <a href="#benefits" className="hover:text-foreground">Benefits</a>
+            <a href="#tutorial" className="hover:text-foreground">Tutorial</a>
+            <a href="#membership" className="hover:text-foreground">Membership</a>
+            <Link to="/blog" className="hover:text-foreground">Blog</Link>
             <a href="#faq" className="hover:text-foreground">FAQ</a>
           </nav>
         </div>
