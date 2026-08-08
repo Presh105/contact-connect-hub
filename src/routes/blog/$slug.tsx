@@ -84,7 +84,7 @@ function BlogPostPage() {
         <p className="mt-4 text-lg text-muted-foreground">{post.description}</p>
 
         <div className="mt-8 space-y-4">
-          {post.body.map((para, i) =>
+          {post.body.map((para: string, i: number) =>
             para.startsWith("## ") ? (
               <h2 key={i} className="pt-4 text-xl font-semibold text-foreground">{para.slice(3)}</h2>
             ) : (
