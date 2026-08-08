@@ -243,6 +243,7 @@ function AdminPage() {
         <Stat label="Pending" value={stats.pending} accent={stats.pending > 0} />
         <Stat label="Rejected" value={stats.rejected} />
         <Stat label="Suspended" value={stats.suspended} />
+        <Stat label="Premium members" value={stats.premium} />
         <Stat label="Current version" value={`v${stats.latestVersion}`} />
         <Stat label="Total downloads" value={stats.totalDownloads} />
         <Stat label="Today / week / month" value={`${stats.today} / ${stats.thisWeek} / ${stats.thisMonth}`} />
@@ -269,6 +270,7 @@ function AdminPage() {
                 <th className="p-3">Phone</th>
                 <th className="p-3">Country</th>
                 <th className="p-3">Status</th>
+                <th className="p-3">Membership</th>
                 <th className="p-3">Joined</th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
@@ -281,18 +283,26 @@ function AdminPage() {
                   <td className="p-3 font-mono text-xs">{u.phone}</td>
                   <td className="p-3">{u.country}</td>
                   <td className="p-3"><StatusBadge status={u.status} /></td>
+                  <td className="p-3">
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs capitalize ${u.membership === "premium" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      {u.membership}
+                    </span>
+                  </td>
                   <td className="p-3 text-xs text-muted-foreground">{new Date(u.registration_date).toLocaleDateString()}</td>
                   <td className="p-3 text-right whitespace-nowrap space-x-1">
                     {u.status !== "approved" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "approved")}>Approve</Button>}
                     {u.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "rejected")}>Reject</Button>}
                     {u.status !== "suspended" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "suspended")}>Suspend</Button>}
+                    <Button size="sm" variant="ghost" onClick={() => setMembership(u, u.membership === "premium" ? "freemium" : "premium")}>
+                      {u.membership === "premium" ? "Downgrade" : "Make premium"}
+                    </Button>
                     <Link to="/admin/user/$id" params={{ id: u.id }}><Button size="sm" variant="ghost">View</Button></Link>
                     <Button size="sm" variant="ghost" className="text-destructive" onClick={() => del(u)}>Delete</Button>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No users</td></tr>
+                <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">No users</td></tr>
               )}
             </tbody>
           </table>
