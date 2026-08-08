@@ -189,6 +189,14 @@ function AdminPage() {
     load();
   }
 
+  async function setMembership(u: UserRow, next: Membership) {
+    const { error } = await supabase.from("profiles").update({ membership: next }).eq("id", u.id);
+    if (error) return toast.error(error.message);
+    await logAudit(`admin_membership_${next}`, { target: u.id });
+    toast.success(`${u.user_code} → ${next}`);
+    load();
+  }
+
   async function del(u: UserRow) {
     if (!confirm(`Delete ${u.user_code} — ${u.full_name}? This removes their profile.`)) return;
     const { error } = await supabase.from("profiles").delete().eq("id", u.id);
@@ -199,7 +207,7 @@ function AdminPage() {
   }
 
   function exportCsv() {
-    const header = ["user_code", "full_name", "phone", "country", "status", "registration_date", "total_contacts_received"];
+    const header = ["user_code", "full_name", "phone", "country", "status", "membership", "registration_date", "total_contacts_received"];
     const rows = users.map((u) => header.map((h) => JSON.stringify((u as unknown as Record<string, unknown>)[h] ?? "")).join(","));
     const csv = [header.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
