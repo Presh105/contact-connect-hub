@@ -117,6 +117,7 @@ function AdminPage() {
       { count: pending },
       { count: rejected },
       { count: suspended },
+      { count: premium },
       { data: latestV },
       { count: downloads },
       { count: today },
@@ -128,6 +129,7 @@ function AdminPage() {
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "rejected"),
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "suspended"),
+      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("membership", "premium"),
       supabase.from("contact_versions").select("version_number").order("version_number", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("downloads").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }).gte("registration_date", dayAgo),
@@ -141,6 +143,7 @@ function AdminPage() {
       pending: pending ?? 0,
       rejected: rejected ?? 0,
       suspended: suspended ?? 0,
+      premium: premium ?? 0,
       latestVersion: latestV?.version_number ?? 0,
       totalDownloads: downloads ?? 0,
       today: today ?? 0,
@@ -150,7 +153,7 @@ function AdminPage() {
 
     const { data: usersData } = await supabase
       .from("profiles")
-      .select("id,user_code,full_name,phone,country,status,registration_date,total_contacts_received")
+      .select("id,user_code,full_name,phone,country,status,membership,registration_date,total_contacts_received")
       .order("registration_date", { ascending: false })
       .limit(300);
     setUsers((usersData as UserRow[]) ?? []);
