@@ -107,6 +107,7 @@ export type Database = {
           last_download_date: string | null
           last_download_version_number: number
           last_login_at: string | null
+          membership: Database["public"]["Enums"]["membership_tier"]
           phone: string
           registration_date: string
           status: Database["public"]["Enums"]["user_status"]
@@ -126,6 +127,7 @@ export type Database = {
           last_download_date?: string | null
           last_download_version_number?: number
           last_login_at?: string | null
+          membership?: Database["public"]["Enums"]["membership_tier"]
           phone: string
           registration_date?: string
           status?: Database["public"]["Enums"]["user_status"]
@@ -145,6 +147,7 @@ export type Database = {
           last_download_date?: string | null
           last_download_version_number?: number
           last_login_at?: string | null
+          membership?: Database["public"]["Enums"]["membership_tier"]
           phone?: string
           registration_date?: string
           status?: Database["public"]["Enums"]["user_status"]
@@ -168,18 +171,24 @@ export type Database = {
           contact_id: string
           downloaded_at: string
           id: string
+          import_confirmed: boolean
+          import_confirmed_at: string | null
           user_id: string
         }
         Insert: {
           contact_id: string
           downloaded_at?: string
           id?: string
+          import_confirmed?: boolean
+          import_confirmed_at?: string | null
           user_id: string
         }
         Update: {
           contact_id?: string
           downloaded_at?: string
           id?: string
+          import_confirmed?: boolean
+          import_confirmed_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -249,6 +258,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      membership_tier: "freemium" | "premium"
       user_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
@@ -378,6 +388,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      membership_tier: ["freemium", "premium"],
       user_status: ["pending", "approved", "rejected", "suspended"],
     },
   },
