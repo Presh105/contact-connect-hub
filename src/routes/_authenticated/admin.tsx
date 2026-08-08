@@ -52,6 +52,7 @@ function AdminGate({ onUnlock }: { onUnlock: () => void }) {
 }
 
 type Status = "pending" | "approved" | "rejected" | "suspended";
+type Membership = "freemium" | "premium";
 
 interface AdminStats {
   totalUsers: number;
@@ -59,6 +60,7 @@ interface AdminStats {
   pending: number;
   rejected: number;
   suspended: number;
+  premium: number;
   latestVersion: number;
   totalDownloads: number;
   today: number;
@@ -73,6 +75,7 @@ interface UserRow {
   phone: string;
   country: string;
   status: Status;
+  membership: Membership;
   registration_date: string;
   total_contacts_received: number;
 }
