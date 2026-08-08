@@ -87,6 +87,18 @@ const FAQS = [
     q: "How can I invite friends?",
     a: "Use the Invite Your Friends button on the homepage to share Status Connect on WhatsApp or copy the link. The bigger the community grows, the more valuable everyone's contact network becomes.",
   },
+  {
+    q: "What is the difference between Freemium and Premium membership?",
+    a: "Freemium members join free and download verified community contacts, and can let Status Connect skip numbers already saved on their phone so files stay small. Premium members download the complete unfiltered list, can export their reciprocal network of members who confirmed saving their number, and get priority approval.",
+  },
+  {
+    q: "Why does Status Connect ask for permission to read my phone contacts?",
+    a: "Only to compare numbers on your own device so your download leaves out contacts you already have. The check happens on your phone through your browser's contact picker — your phone book is never uploaded, stored or shared.",
+  },
+  {
+    q: "Who are the StatusConnect-Administrator contacts in my VCF file?",
+    a: "Every downloaded file includes the two official Status Connect administrator numbers, +2348139667218 and +2349116536969, saved as StatusConnect-Administrator so you can always reach support and see official community updates.",
+  },
 ];
 
 export const Route = createFileRoute("/")({
@@ -193,7 +205,8 @@ function Landing() {
             <img src="/favicon.png" alt="Status Connect logo" width={32} height={32} className="h-8 w-8 rounded-md" />
             <span className="font-semibold text-foreground">Status Connect</span>
           </div>
-          <nav className="flex gap-2" aria-label="Primary">
+          <nav className="flex items-center gap-2" aria-label="Primary">
+            <Link to="/blog"><Button variant="ghost" size="sm">Blog</Button></Link>
             <Link to="/auth"><Button variant="ghost" size="sm">Log in</Button></Link>
             <Link to="/auth" search={{ mode: "register" }}><Button size="sm">Register</Button></Link>
           </nav>
