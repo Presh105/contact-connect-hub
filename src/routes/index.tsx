@@ -27,6 +27,7 @@ import {
   Gift,
   Zap,
   BadgeCheck,
+  PlayCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -36,6 +37,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import heroImage from "@/assets/hero.jpg";
+import { BLOG_POSTS } from "@/lib/blog-posts";
+
+/** Set this to an embeddable tutorial video URL (e.g. https://www.youtube.com/embed/VIDEO_ID). */
+const TUTORIAL_VIDEO_URL = "";
 
 const TITLE = "Status Connect — Grow Your WhatsApp Business Network Across Nigeria";
 const DESCRIPTION =
