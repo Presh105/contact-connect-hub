@@ -52,6 +52,7 @@ function AdminGate({ onUnlock }: { onUnlock: () => void }) {
 }
 
 type Status = "pending" | "approved" | "rejected" | "suspended";
+type Membership = "freemium" | "premium";
 
 interface AdminStats {
   totalUsers: number;
@@ -59,6 +60,7 @@ interface AdminStats {
   pending: number;
   rejected: number;
   suspended: number;
+  premium: number;
   latestVersion: number;
   totalDownloads: number;
   today: number;
@@ -73,6 +75,7 @@ interface UserRow {
   phone: string;
   country: string;
   status: Status;
+  membership: Membership;
   registration_date: string;
   total_contacts_received: number;
 }
@@ -114,6 +117,7 @@ function AdminPage() {
       { count: pending },
       { count: rejected },
       { count: suspended },
+      { count: premium },
       { data: latestV },
       { count: downloads },
       { count: today },
@@ -125,6 +129,7 @@ function AdminPage() {
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "rejected"),
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "suspended"),
+      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("membership", "premium"),
       supabase.from("contact_versions").select("version_number").order("version_number", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("downloads").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }).gte("registration_date", dayAgo),
@@ -138,6 +143,7 @@ function AdminPage() {
       pending: pending ?? 0,
       rejected: rejected ?? 0,
       suspended: suspended ?? 0,
+      premium: premium ?? 0,
       latestVersion: latestV?.version_number ?? 0,
       totalDownloads: downloads ?? 0,
       today: today ?? 0,
@@ -147,7 +153,7 @@ function AdminPage() {
 
     const { data: usersData } = await supabase
       .from("profiles")
-      .select("id,user_code,full_name,phone,country,status,registration_date,total_contacts_received")
+      .select("id,user_code,full_name,phone,country,status,membership,registration_date,total_contacts_received")
       .order("registration_date", { ascending: false })
       .limit(300);
     setUsers((usersData as UserRow[]) ?? []);
@@ -183,6 +189,14 @@ function AdminPage() {
     load();
   }
 
+  async function setMembership(u: UserRow, next: Membership) {
+    const { error } = await supabase.from("profiles").update({ membership: next }).eq("id", u.id);
+    if (error) return toast.error(error.message);
+    await logAudit(`admin_membership_${next}`, { target: u.id });
+    toast.success(`${u.user_code} → ${next}`);
+    load();
+  }
+
   async function del(u: UserRow) {
     if (!confirm(`Delete ${u.user_code} — ${u.full_name}? This removes their profile.`)) return;
     const { error } = await supabase.from("profiles").delete().eq("id", u.id);
@@ -193,7 +207,7 @@ function AdminPage() {
   }
 
   function exportCsv() {
-    const header = ["user_code", "full_name", "phone", "country", "status", "registration_date", "total_contacts_received"];
+    const header = ["user_code", "full_name", "phone", "country", "status", "membership", "registration_date", "total_contacts_received"];
     const rows = users.map((u) => header.map((h) => JSON.stringify((u as unknown as Record<string, unknown>)[h] ?? "")).join(","));
     const csv = [header.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -229,6 +243,7 @@ function AdminPage() {
         <Stat label="Pending" value={stats.pending} accent={stats.pending > 0} />
         <Stat label="Rejected" value={stats.rejected} />
         <Stat label="Suspended" value={stats.suspended} />
+        <Stat label="Premium members" value={stats.premium} />
         <Stat label="Current version" value={`v${stats.latestVersion}`} />
         <Stat label="Total downloads" value={stats.totalDownloads} />
         <Stat label="Today / week / month" value={`${stats.today} / ${stats.thisWeek} / ${stats.thisMonth}`} />
@@ -255,6 +270,7 @@ function AdminPage() {
                 <th className="p-3">Phone</th>
                 <th className="p-3">Country</th>
                 <th className="p-3">Status</th>
+                <th className="p-3">Membership</th>
                 <th className="p-3">Joined</th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
@@ -267,18 +283,26 @@ function AdminPage() {
                   <td className="p-3 font-mono text-xs">{u.phone}</td>
                   <td className="p-3">{u.country}</td>
                   <td className="p-3"><StatusBadge status={u.status} /></td>
+                  <td className="p-3">
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs capitalize ${u.membership === "premium" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      {u.membership}
+                    </span>
+                  </td>
                   <td className="p-3 text-xs text-muted-foreground">{new Date(u.registration_date).toLocaleDateString()}</td>
                   <td className="p-3 text-right whitespace-nowrap space-x-1">
                     {u.status !== "approved" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "approved")}>Approve</Button>}
                     {u.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "rejected")}>Reject</Button>}
                     {u.status !== "suspended" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "suspended")}>Suspend</Button>}
+                    <Button size="sm" variant="ghost" onClick={() => setMembership(u, u.membership === "premium" ? "freemium" : "premium")}>
+                      {u.membership === "premium" ? "Downgrade" : "Make premium"}
+                    </Button>
                     <Link to="/admin/user/$id" params={{ id: u.id }}><Button size="sm" variant="ghost">View</Button></Link>
                     <Button size="sm" variant="ghost" className="text-destructive" onClick={() => del(u)}>Delete</Button>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No users</td></tr>
+                <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">No users</td></tr>
               )}
             </tbody>
           </table>

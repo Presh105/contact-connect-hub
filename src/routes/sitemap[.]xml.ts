@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 
 const BASE_URL = "https://statusconnect.com.ng"; // resolved against request host by crawlers
 
@@ -15,6 +16,12 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "daily", priority: "1.0" },
+          { path: "/blog", changefreq: "weekly", priority: "0.8" },
+          ...BLOG_POSTS.map((p) => ({
+            path: `/blog/${p.slug}`,
+            changefreq: "monthly" as const,
+            priority: "0.7",
+          })),
           { path: "/auth", changefreq: "monthly", priority: "0.5" },
         ];
 
