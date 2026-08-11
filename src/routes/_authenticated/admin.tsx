@@ -164,7 +164,29 @@ function AdminPage() {
       .order("created_at", { ascending: false })
       .limit(20);
     setActivity((act as Activity[]) ?? []);
+
+    const { data: setting } = await supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "tutorial_video_url")
+      .maybeSingle();
+    setVideoUrl((setting?.value as string) ?? "");
   }
+
+  async function saveVideoUrl() {
+    if (videoUrl.trim() && !toYouTubeEmbed(videoUrl)) {
+      return toast.error("That doesn't look like a YouTube link");
+    }
+    setSavingVideo(true);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "tutorial_video_url", value: videoUrl.trim() }, { onConflict: "key" });
+    setSavingVideo(false);
+    if (error) return toast.error(error.message);
+    await logAudit("admin_set_tutorial_video");
+    toast.success("Tutorial video saved — it now shows on every member dashboard");
+  }
+
 
   useEffect(() => { if (user && unlocked) load(); }, [user?.id, unlocked]);
 
