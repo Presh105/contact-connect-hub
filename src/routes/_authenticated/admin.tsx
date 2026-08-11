@@ -97,6 +97,8 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [publishing, setPublishing] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [savingVideo, setSavingVideo] = useState(false);
   const [unlocked, setUnlocked] = useState(() =>
     typeof window !== "undefined" && sessionStorage.getItem(GATE_KEY) === "1",
   );
