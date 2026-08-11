@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
+import { toYouTubeEmbed } from "@/lib/youtube";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
