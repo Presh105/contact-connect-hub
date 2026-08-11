@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
+import { toYouTubeEmbed } from "@/lib/youtube";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -96,6 +97,8 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [publishing, setPublishing] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [savingVideo, setSavingVideo] = useState(false);
   const [unlocked, setUnlocked] = useState(() =>
     typeof window !== "undefined" && sessionStorage.getItem(GATE_KEY) === "1",
   );
@@ -164,7 +167,29 @@ function AdminPage() {
       .order("created_at", { ascending: false })
       .limit(20);
     setActivity((act as Activity[]) ?? []);
+
+    const { data: setting } = await supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "tutorial_video_url")
+      .maybeSingle();
+    setVideoUrl((setting?.value as string) ?? "");
   }
+
+  async function saveVideoUrl() {
+    if (videoUrl.trim() && !toYouTubeEmbed(videoUrl)) {
+      return toast.error("That doesn't look like a YouTube link");
+    }
+    setSavingVideo(true);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "tutorial_video_url", value: videoUrl.trim() }, { onConflict: "key" });
+    setSavingVideo(false);
+    if (error) return toast.error(error.message);
+    await logAudit("admin_set_tutorial_video");
+    toast.success("Tutorial video saved — it now shows on every member dashboard");
+  }
+
 
   useEffect(() => { if (user && unlocked) load(); }, [user?.id, unlocked]);
 
@@ -236,6 +261,35 @@ function AdminPage() {
           {publishing ? "Publishing…" : "Publish new contact version"}
         </Button>
       </div>
+
+      <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+        <div>
+          <h2 className="font-semibold text-foreground">Tutorial video (members' dashboard)</h2>
+          <p className="text-sm text-muted-foreground">
+            Paste a YouTube link showing how to install the VCF file and save the contacts. It appears on every member's dashboard. Leave empty to hide it.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Input
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            className="max-w-md"
+          />
+          <Button onClick={saveVideoUrl} disabled={savingVideo}>{savingVideo ? "Saving…" : "Save video"}</Button>
+        </div>
+        {toYouTubeEmbed(videoUrl) && (
+          <div className="relative w-full max-w-md" style={{ paddingTop: "31.6%" }}>
+            <iframe
+              src={toYouTubeEmbed(videoUrl)!}
+              title="Tutorial preview"
+              className="absolute inset-0 h-full w-full rounded-md"
+              allowFullScreen
+            />
+          </div>
+        )}
+      </div>
+
 
       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <Stat label="Total users" value={stats.totalUsers} />
