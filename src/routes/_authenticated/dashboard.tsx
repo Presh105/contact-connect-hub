@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Download, RefreshCcw, History, Sparkles, Clock, Bell, Crown, ShieldCheck, CheckCircle2, Filter } from "lucide-react";
+import { Download, RefreshCcw, History, Sparkles, Clock, Bell, Crown, ShieldCheck, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
-import { generateVcf, generateNamedVcf, downloadVcf, phoneKey } from "@/lib/vcf";
-import { contactPickerSupported, readExistingPhoneKeys } from "@/lib/contacts-picker";
+import { generateVcf, generateNamedVcf, downloadVcf } from "@/lib/vcf";
 import { logAudit } from "@/lib/audit";
+import { toYouTubeEmbed } from "@/lib/youtube";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -34,7 +34,6 @@ interface Stats {
 interface Downloader {
   id: string;
   downloaded_at: string;
-  confirmed: boolean;
   phone: string;
   user_code: string;
   full_name: string;
@@ -53,26 +52,27 @@ function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [busy, setBusy] = useState<null | "new" | "full" | "network">(null);
   const [downloaders, setDownloaders] = useState<Downloader[]>([]);
-  const [pendingConfirm, setPendingConfirm] = useState<string[]>([]);
-  const [filterPhone, setFilterPhone] = useState(true);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
 
-    const [{ data: profile }, { data: latestV }, { count: totalActive }] = await Promise.all([
+    const [{ data: profile }, { data: latestV }, { count: totalActive }, { data: setting }] = await Promise.all([
       supabase
         .from("profiles")
         .select("user_code,full_name,last_download_version_number,last_download_date,total_contacts_received,status,membership,registration_date")
         .eq("id", user.id)
-        .single(),
+        .maybeSingle(),
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
       supabase
         .from("profiles")
         .select("*", { count: "exact", head: true })
         .eq("status", "approved")
-        .eq("is_active", true)
         .neq("id", user.id),
+      supabase.from("app_settings").select("value").eq("key", "tutorial_video_url").maybeSingle(),
     ]);
+
+    setVideoUrl(toYouTubeEmbed((setting?.value as string) ?? ""));
 
     const { data: delivered } = await supabase
       .from("user_downloaded_contacts")
@@ -88,7 +88,6 @@ function Dashboard() {
         .from("profiles")
         .select("id")
         .eq("status", "approved")
-        .eq("is_active", true)
         .neq("id", user.id);
       newCount = (candidates ?? []).filter((r) => !deliveredIds.has(r.id as string)).length;
     }
@@ -103,7 +102,7 @@ function Dashboard() {
       lastDownloadDate: profile?.last_download_date ?? null,
       userCode: profile?.user_code ?? "",
       fullName: profile?.full_name ?? "",
-      status: (profile?.status as Stats["status"]) ?? "pending",
+      status: (profile?.status as Stats["status"]) ?? "approved",
       membership: ((profile as { membership?: Membership } | null)?.membership ?? "freemium") as Membership,
       registrationDate: profile?.registration_date ?? "",
       isFirstDownload: deliveredIds.size === 0,
@@ -112,7 +111,7 @@ function Dashboard() {
     // People who received / saved this user's contact
     const { data: dlRows } = await supabase
       .from("user_downloaded_contacts")
-      .select("id,downloaded_at,user_id,import_confirmed")
+      .select("id,downloaded_at,user_id")
       .eq("contact_id", user.id)
       .order("downloaded_at", { ascending: false })
       .limit(200);
@@ -136,7 +135,6 @@ function Dashboard() {
         return {
           id: r.id as string,
           downloaded_at: r.downloaded_at as string,
-          confirmed: Boolean((r as { import_confirmed?: boolean }).import_confirmed),
           phone: p?.phone ?? "",
           user_code: p?.user_code ?? "—",
           full_name: p?.full_name ?? "",
@@ -172,7 +170,6 @@ function Dashboard() {
       .from("profiles")
       .select("id,contact_seq,phone")
       .eq("status", "approved")
-      .eq("is_active", true)
       .neq("id", user.id);
     if (deliveredIds.length) {
       q = q.not("id", "in", `(${deliveredIds.join(",")})`);
@@ -184,17 +181,6 @@ function Dashboard() {
       contact_seq: r.contact_seq as number,
       phone: r.phone as string,
     }));
-  }
-
-  /** Freemium: strip numbers already saved on the member's phone (with permission). */
-  async function applyPhoneFilter<T extends { phone: string }>(contacts: T[]): Promise<T[]> {
-    if (!filterPhone || !contactPickerSupported()) return contacts;
-    const existing = await readExistingPhoneKeys();
-    if (!existing || existing.size === 0) return contacts;
-    const filtered = contacts.filter((c) => !existing.has(phoneKey(c.phone)));
-    const removed = contacts.length - filtered.length;
-    if (removed > 0) toast.info(`${removed} contact${removed === 1 ? "" : "s"} already on your phone were skipped.`);
-    return filtered;
   }
 
   async function recordDelivery(contacts: { id: string }[], kind: "first_community" | "new" | "complete") {
@@ -220,38 +206,15 @@ function Dashboard() {
       total_contacts_received: stats.downloaded + contacts.length,
     }).eq("id", user.id);
     await logAudit(`download_${kind}`, { count: contacts.length });
-    setPendingConfirm(contacts.map((c) => c.id));
-  }
-
-  /** A download is not proof of a save — the member confirms the import explicitly. */
-  async function confirmImport() {
-    if (!user || pendingConfirm.length === 0) return;
-    const CHUNK = 200;
-    for (let i = 0; i < pendingConfirm.length; i += CHUNK) {
-      await supabase
-        .from("user_downloaded_contacts")
-        .update({ import_confirmed: true, import_confirmed_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .in("contact_id", pendingConfirm.slice(i, i + CHUNK));
-    }
-    await logAudit("confirm_import", { count: pendingConfirm.length });
-    setPendingConfirm([]);
-    toast.success("Thanks — your saves are confirmed for the community.");
-    load();
   }
 
   async function downloadNew() {
     if (!stats) return;
     setBusy("new");
     try {
-      const all = await fetchUndeliveredContacts();
-      if (all.length < MIN_CONTACTS) {
-        toast.info(`Only ${all.length} new contact${all.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS} — please check back soon.`);
-        return;
-      }
-      const contacts = stats.membership === "premium" ? all : await applyPhoneFilter(all);
-      if (contacts.length === 0) {
-        toast.info("You already have all of these contacts saved on your phone.");
+      const contacts = await fetchUndeliveredContacts();
+      if (contacts.length < MIN_CONTACTS) {
+        toast.info(`Only ${contacts.length} new contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS} — please check back soon.`);
         return;
       }
       const kind: "first_community" | "new" = stats.isFirstDownload ? "first_community" : "new";
@@ -276,22 +239,16 @@ function Dashboard() {
         .from("profiles")
         .select("id,contact_seq,phone")
         .eq("status", "approved")
-        .eq("is_active", true)
         .neq("id", user.id)
         .order("contact_seq");
       if (error) throw error;
-      const all = (data ?? []).map((r) => ({
+      const contacts = (data ?? []).map((r) => ({
         id: r.id as string,
         contact_seq: r.contact_seq as number,
         phone: r.phone as string,
       }));
-      if (all.length < MIN_CONTACTS) {
-        toast.info(`Only ${all.length} approved contact${all.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS}.`);
-        return;
-      }
-      const contacts = stats.membership === "premium" ? all : await applyPhoneFilter(all);
-      if (contacts.length === 0) {
-        toast.info("Every community contact is already saved on your phone.");
+      if (contacts.length < MIN_CONTACTS) {
+        toast.info(`Only ${contacts.length} approved contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS}.`);
         return;
       }
       downloadVcf(
@@ -306,16 +263,16 @@ function Dashboard() {
     } finally { setBusy(null); }
   }
 
-  /** Premium: download the reciprocal network — members who saved your number. */
+  /** Premium: download the reciprocal network — members who received your number. */
   async function downloadNetwork() {
     if (!stats) return;
     setBusy("network");
     try {
       const entries = downloaders
-        .filter((d) => d.confirmed && d.phone)
+        .filter((d) => d.phone)
         .map((d) => ({ name: `Status Connect ${d.user_code}`, phone: d.phone }));
       if (entries.length === 0) {
-        toast.info("No confirmed saves yet — your reciprocal network will appear here.");
+        toast.info("No saves yet — your reciprocal network will appear here.");
         return;
       }
       downloadVcf(`status-connect-network-${entries.length}contacts.vcf`, generateNamedVcf(entries));
@@ -344,7 +301,6 @@ function Dashboard() {
   const canDownloadNew = stats.newAvailable >= MIN_CONTACTS;
   const noDownloadable = stats.total === 0;
   const isPremium = stats.membership === "premium";
-  const confirmedSaves = downloaders.filter((d) => d.confirmed).length;
 
   return (
     <div className="space-y-6">
@@ -380,44 +336,25 @@ function Dashboard() {
         )}
       </div>
 
-      {!isPremium && (
-        <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-          <div className="flex items-start gap-3">
-            <Filter className="h-5 w-5 text-primary mt-0.5" aria-hidden />
-            <div className="space-y-1">
-              <h2 className="font-semibold text-foreground">Skip contacts you already have</h2>
-              <p className="text-sm text-muted-foreground">
-                {contactPickerSupported()
-                  ? "With your permission we check your phone's contacts on your device and leave out numbers you've already saved. Nothing from your phone book is uploaded or stored."
-                  : "Your browser doesn't support on-device contact checking. Open Status Connect in Chrome on Android to skip numbers you already have."}
-              </p>
-            </div>
+      {videoUrl && (
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-border">
+            <PlayCircle className="h-4 w-4 text-primary" />
+            <h2 className="font-semibold text-foreground">How to install your VCF file</h2>
           </div>
-          {contactPickerSupported() && (
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={filterPhone}
-                onChange={(e) => setFilterPhone(e.target.checked)}
-                className="h-4 w-4 rounded border-input accent-[hsl(var(--primary))]"
-              />
-              Ask permission and filter out contacts already on my phone
-            </label>
-          )}
-          <div className="rounded-md bg-primary/5 border border-primary/20 p-3 text-sm text-foreground">
-            <span className="font-medium">Premium members</span> download the complete list without filtering and can export their reciprocal network. Ask an administrator to upgrade your account.
+          <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+            <iframe
+              src={videoUrl}
+              title="How to install the VCF file and save contacts"
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+            />
           </div>
-        </div>
-      )}
-
-      {pendingConfirm.length > 0 && (
-        <div className="rounded-lg border border-primary bg-primary/5 p-4 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-foreground">
-            Did you import the file into your phone? Downloading alone isn't counted as a save.
+          <p className="p-4 text-xs text-muted-foreground">
+            Watch this short tutorial to import the downloaded contacts into your phone so your WhatsApp status reaches everyone.
           </p>
-          <Button size="sm" onClick={confirmImport}>
-            <CheckCircle2 className="h-4 w-4 mr-2" /> Yes, I saved {pendingConfirm.length} contacts
-          </Button>
         </div>
       )}
 
@@ -427,7 +364,7 @@ function Dashboard() {
         <StatCard label="Your last version" value={stats.lastDownloadVersion ? `v${stats.lastDownloadVersion}` : "—"} />
         <StatCard label="New since last download" value={stats.newAvailable} accent />
         <StatCard label="Total contacts received" value={stats.downloaded} />
-        <StatCard label="Confirmed saves of your number" value={confirmedSaves} />
+        <StatCard label="People who saved your number" value={downloaders.length} />
         <StatCard label="Last download" value={stats.lastDownloadDate ? new Date(stats.lastDownloadDate).toLocaleDateString() : "—"} small />
         <StatCard label="Registered" value={stats.registrationDate ? new Date(stats.registrationDate).toLocaleDateString() : "—"} small />
       </div>
@@ -444,7 +381,7 @@ function Dashboard() {
         {isPremium && (
           <Button size="lg" variant="outline" onClick={downloadNetwork} disabled={busy !== null}>
             <Crown className="h-4 w-4 mr-2" />
-            {busy === "network" ? "Preparing…" : `My Reciprocal Network (${confirmedSaves})`}
+            {busy === "network" ? "Preparing…" : `My Reciprocal Network (${downloaders.length})`}
           </Button>
         )}
         <Link to="/download-history">
@@ -460,7 +397,7 @@ function Dashboard() {
             <Bell className="h-4 w-4 text-primary" />
             <h2 className="font-semibold text-foreground">Who saved your contact</h2>
           </div>
-          <span className="text-sm font-semibold text-primary">{confirmedSaves} confirmed / {downloaders.length} received</span>
+          <span className="text-sm font-semibold text-primary">{downloaders.length}</span>
         </div>
         {downloaders.length === 0 ? (
           <p className="p-4 text-sm text-muted-foreground">
@@ -477,12 +414,7 @@ function Dashboard() {
                     {isPremium && d.full_name ? ` · ${d.full_name}` : ""}
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className={`text-xs font-medium ${d.confirmed ? "text-primary" : "text-muted-foreground"}`}>
-                    {d.confirmed ? "Saved" : "Received"}
-                  </span>
-                  <p className="text-xs text-muted-foreground">{new Date(d.downloaded_at).toLocaleString()}</p>
-                </div>
+                <p className="text-xs text-muted-foreground">{new Date(d.downloaded_at).toLocaleString()}</p>
               </li>
             ))}
           </ul>
