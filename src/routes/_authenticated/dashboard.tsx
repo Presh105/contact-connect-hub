@@ -296,25 +296,38 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground">Your ID: <span className="font-mono">{stats.userCode}</span></p>
       </div>
 
-      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
-        <p className="text-xs uppercase tracking-wide text-primary font-semibold">Contacts Ready to Save</p>
-        {stats.newAvailable > 0 ? (
-          <>
-            <p className="text-2xl font-semibold text-foreground">
-              {stats.newAvailable} new contact{stats.newAvailable === 1 ? "" : "s"} available
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {canDownloadNew
-                ? "Tap Download Community Contacts below to add them to your phone."
-                : `${MIN_CONTACTS - stats.newAvailable} more needed before your next download unlocks.`}
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-foreground">
-            Please return in 30 minutes to check for newly approved community members.
+      {isPremium ? (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+          <p className="text-xs uppercase tracking-wide text-primary font-semibold">Your Reciprocal Network</p>
+          <p className="text-2xl font-semibold text-foreground">
+            {downloaders.length} member{downloaders.length === 1 ? "" : "s"} saved your number
           </p>
-        )}
-      </div>
+          <p className="text-xs text-muted-foreground">
+            As a Premium member you download only your reciprocal contacts — the people who saved your number — so every save goes both ways.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+          <p className="text-xs uppercase tracking-wide text-primary font-semibold">Contacts Ready to Save</p>
+          {stats.newAvailable > 0 ? (
+            <>
+              <p className="text-2xl font-semibold text-foreground">
+                {stats.newAvailable} new contact{stats.newAvailable === 1 ? "" : "s"} available
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {canDownloadNew
+                  ? "Tap Download Community Contacts below to add them to your phone."
+                  : `${MIN_CONTACTS - stats.newAvailable} more needed before your next download unlocks.`}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-foreground">
+              Please return in 30 minutes to check for newly approved community members.
+            </p>
+          )}
+        </div>
+      )}
+
 
       {videoUrl && (
         <div className="rounded-lg border border-border bg-card overflow-hidden">
