@@ -40,12 +40,22 @@ interface Downloader {
 }
 
 const MIN_CONTACTS = 5;
+const ACTIVE_WINDOW_DAYS = 7;
+
+/** A member counts as active if they logged in within the last 7 days (or just registered). */
+function isRecentlyActive(row: { last_login_at?: string | null; registration_date?: string | null }) {
+  const cutoff = Date.now() - ACTIVE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const stamp = row.last_login_at ?? row.registration_date;
+  if (!stamp) return false;
+  return new Date(stamp).getTime() >= cutoff;
+}
 
 function maskPhone(p: string) {
   const s = p.trim();
   if (s.length <= 4) return "•••" + s;
   return s.slice(0, Math.min(4, s.length - 4)) + "••••" + s.slice(-2);
 }
+
 
 function Dashboard() {
   const { user } = useAuth();
