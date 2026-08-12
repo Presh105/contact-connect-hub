@@ -240,37 +240,8 @@ function Dashboard() {
     } finally { setBusy(null); }
   }
 
-  async function downloadFull() {
-    if (!stats || !user) return;
-    setBusy("full");
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id,contact_seq,phone")
-        .eq("status", "approved")
-        .neq("id", user.id)
-        .order("contact_seq");
-      if (error) throw error;
-      const contacts = (data ?? []).map((r) => ({
-        id: r.id as string,
-        contact_seq: r.contact_seq as number,
-        phone: r.phone as string,
-      }));
-      if (contacts.length < MIN_CONTACTS) {
-        toast.info(`Only ${contacts.length} approved contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS}.`);
-        return;
-      }
-      downloadVcf(
-        `status-connect-full-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
-        generateVcf(contacts),
-      );
-      await recordDelivery(contacts, "complete");
-      toast.success(`Downloaded ${contacts.length} contacts`);
-      load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed");
-    } finally { setBusy(null); }
-  }
+  /** Premium: download the reciprocal network — members who saved your number. */
+
 
   /** Premium: download the reciprocal network — members who received your number. */
   async function downloadNetwork() {
