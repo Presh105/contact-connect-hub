@@ -67,7 +67,7 @@ function Dashboard() {
   const load = useCallback(async () => {
     if (!user) return;
 
-    const [{ data: profile }, { data: latestV }, { count: totalActive }, { data: setting }] = await Promise.all([
+    const [{ data: profile }, { data: latestV }, { data: activeRows }, { data: setting }] = await Promise.all([
       supabase
         .from("profiles")
         .select("user_code,full_name,last_download_version_number,last_download_date,total_contacts_received,status,membership,registration_date")
@@ -76,7 +76,7 @@ function Dashboard() {
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
       supabase
         .from("profiles")
-        .select("*", { count: "exact", head: true })
+        .select("id,last_login_at,registration_date")
         .eq("status", "approved")
         .neq("id", user.id),
       supabase.from("app_settings").select("value").eq("key", "tutorial_video_url").maybeSingle(),
@@ -90,20 +90,16 @@ function Dashboard() {
       .eq("user_id", user.id);
     const deliveredIds = new Set((delivered ?? []).map((r) => r.contact_id as string));
 
-    let newCount = 0;
-    if (deliveredIds.size === 0) {
-      newCount = totalActive ?? 0;
-    } else {
-      const { data: candidates } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("status", "approved")
-        .neq("id", user.id);
-      newCount = (candidates ?? []).filter((r) => !deliveredIds.has(r.id as string)).length;
-    }
+    // Only members who logged in within the last 7 days are eligible for community VCFs.
+    const eligible = (activeRows ?? []).filter((r) =>
+      isRecentlyActive(r as { last_login_at?: string | null; registration_date?: string | null }),
+    );
+    const totalActive = eligible.length;
+    const newCount = eligible.filter((r) => !deliveredIds.has(r.id as string)).length;
 
     setStats({
-      total: totalActive ?? 0,
+      total: totalActive,
+
       downloaded: profile?.total_contacts_received ?? 0,
       newAvailable: newCount,
       lastUpdate: latestV?.created_at ?? null,
