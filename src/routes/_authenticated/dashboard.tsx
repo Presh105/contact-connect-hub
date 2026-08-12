@@ -174,7 +174,7 @@ function Dashboard() {
 
     let q = supabase
       .from("profiles")
-      .select("id,contact_seq,phone")
+      .select("id,contact_seq,phone,last_login_at,registration_date")
       .eq("status", "approved")
       .neq("id", user.id);
     if (deliveredIds.length) {
@@ -182,11 +182,14 @@ function Dashboard() {
     }
     const { data, error } = await q.order("contact_seq");
     if (error) throw error;
-    return (data ?? []).map((r) => ({
-      id: r.id as string,
-      contact_seq: r.contact_seq as number,
-      phone: r.phone as string,
-    }));
+    return (data ?? [])
+      .filter((r) => isRecentlyActive(r as { last_login_at?: string | null; registration_date?: string | null }))
+      .map((r) => ({
+        id: r.id as string,
+        contact_seq: r.contact_seq as number,
+        phone: r.phone as string,
+      }));
+
   }
 
   async function recordDelivery(contacts: { id: string }[], kind: "first_community" | "new" | "complete") {
