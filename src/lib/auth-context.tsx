@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   return (
-    <AuthCtx.Provider value={{ session, user: session?.user ?? null, loading, isAdmin }}>
+    <AuthCtx.Provider value={{ session, user: session?.user ?? null, loading, isAdmin, membership }}>
       {children}
     </AuthCtx.Provider>
   );
