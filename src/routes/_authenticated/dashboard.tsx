@@ -349,19 +349,16 @@ function Dashboard() {
         <StatCard label="Registered" value={stats.registrationDate ? new Date(stats.registrationDate).toLocaleDateString() : "—"} small />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Button size="lg" onClick={downloadNew} disabled={busy !== null || !canDownloadNew} className="sm:col-span-2 lg:col-span-1">
-          {stats.isFirstDownload ? <Sparkles className="h-4 w-4 mr-2" /> : <RefreshCcw className="h-4 w-4 mr-2" />}
-          {busy === "new" ? "Preparing…" : `Download Community Contacts${stats.newAvailable > 0 ? ` (${stats.newAvailable})` : ""}`}
-        </Button>
-        <Button size="lg" variant="outline" onClick={downloadFull} disabled={busy !== null || noDownloadable}>
-          <Download className="h-4 w-4 mr-2" />
-          {busy === "full" ? "Preparing…" : "Download Complete List"}
-        </Button>
-        {isPremium && (
-          <Button size="lg" variant="outline" onClick={downloadNetwork} disabled={busy !== null}>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {isPremium ? (
+          <Button size="lg" onClick={downloadNetwork} disabled={busy !== null} className="sm:col-span-2 lg:col-span-2">
             <Crown className="h-4 w-4 mr-2" />
-            {busy === "network" ? "Preparing…" : `My Reciprocal Network (${downloaders.length})`}
+            {busy === "network" ? "Preparing…" : `Download My Reciprocal Network (${downloaders.length})`}
+          </Button>
+        ) : (
+          <Button size="lg" onClick={downloadNew} disabled={busy !== null || !canDownloadNew} className="sm:col-span-2 lg:col-span-2">
+            {stats.isFirstDownload ? <Sparkles className="h-4 w-4 mr-2" /> : <RefreshCcw className="h-4 w-4 mr-2" />}
+            {busy === "new" ? "Preparing…" : `Download Community Contacts${stats.newAvailable > 0 ? ` (${stats.newAvailable})` : ""}`}
           </Button>
         )}
         <Link to="/download-history">
@@ -370,6 +367,7 @@ function Dashboard() {
           </Button>
         </Link>
       </div>
+
 
       <div className="rounded-lg border border-border bg-card">
         <div className="flex items-center justify-between p-4 border-b border-border">
