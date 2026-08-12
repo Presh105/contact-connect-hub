@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdScript } from "@/components/ad-script";
+
 
 function NotFoundComponent() {
   return (
@@ -111,13 +113,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head><HeadContent />
-        <script
-  src="https://quge5.com/88/tag.min.js"
-  data-zone="269656"
-  async
-  data-cfasync="false"
-/></head>
+      <head><HeadContent /></head>
+
       <body>
         {children}
         <Scripts />
@@ -142,9 +139,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <AdScript />
         <Outlet />
         <Toaster />
       </AuthProvider>
+
     </QueryClientProvider>
   );
 }

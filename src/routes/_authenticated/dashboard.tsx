@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Download, RefreshCcw, History, Sparkles, Clock, Bell, Crown, ShieldCheck, PlayCircle } from "lucide-react";
+import { RefreshCcw, History, Sparkles, Clock, Bell, Crown, ShieldCheck, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { generateVcf, generateNamedVcf, downloadVcf } from "@/lib/vcf";
 import { logAudit } from "@/lib/audit";
@@ -40,12 +40,22 @@ interface Downloader {
 }
 
 const MIN_CONTACTS = 5;
+const ACTIVE_WINDOW_DAYS = 7;
+
+/** A member counts as active if they logged in within the last 7 days (or just registered). */
+function isRecentlyActive(row: { last_login_at?: string | null; registration_date?: string | null }) {
+  const cutoff = Date.now() - ACTIVE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const stamp = row.last_login_at ?? row.registration_date;
+  if (!stamp) return false;
+  return new Date(stamp).getTime() >= cutoff;
+}
 
 function maskPhone(p: string) {
   const s = p.trim();
   if (s.length <= 4) return "•••" + s;
   return s.slice(0, Math.min(4, s.length - 4)) + "••••" + s.slice(-2);
 }
+
 
 function Dashboard() {
   const { user } = useAuth();
@@ -57,7 +67,7 @@ function Dashboard() {
   const load = useCallback(async () => {
     if (!user) return;
 
-    const [{ data: profile }, { data: latestV }, { count: totalActive }, { data: setting }] = await Promise.all([
+    const [{ data: profile }, { data: latestV }, { data: activeRows }, { data: setting }] = await Promise.all([
       supabase
         .from("profiles")
         .select("user_code,full_name,last_download_version_number,last_download_date,total_contacts_received,status,membership,registration_date")
@@ -66,7 +76,7 @@ function Dashboard() {
       supabase.from("contact_versions").select("version_number,created_at").order("version_number", { ascending: false }).limit(1).maybeSingle(),
       supabase
         .from("profiles")
-        .select("*", { count: "exact", head: true })
+        .select("id,last_login_at,registration_date")
         .eq("status", "approved")
         .neq("id", user.id),
       supabase.from("app_settings").select("value").eq("key", "tutorial_video_url").maybeSingle(),
@@ -80,20 +90,16 @@ function Dashboard() {
       .eq("user_id", user.id);
     const deliveredIds = new Set((delivered ?? []).map((r) => r.contact_id as string));
 
-    let newCount = 0;
-    if (deliveredIds.size === 0) {
-      newCount = totalActive ?? 0;
-    } else {
-      const { data: candidates } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("status", "approved")
-        .neq("id", user.id);
-      newCount = (candidates ?? []).filter((r) => !deliveredIds.has(r.id as string)).length;
-    }
+    // Only members who logged in within the last 7 days are eligible for community VCFs.
+    const eligible = (activeRows ?? []).filter((r) =>
+      isRecentlyActive(r as { last_login_at?: string | null; registration_date?: string | null }),
+    );
+    const totalActive = eligible.length;
+    const newCount = eligible.filter((r) => !deliveredIds.has(r.id as string)).length;
 
     setStats({
-      total: totalActive ?? 0,
+      total: totalActive,
+
       downloaded: profile?.total_contacts_received ?? 0,
       newAvailable: newCount,
       lastUpdate: latestV?.created_at ?? null,
@@ -168,7 +174,7 @@ function Dashboard() {
 
     let q = supabase
       .from("profiles")
-      .select("id,contact_seq,phone")
+      .select("id,contact_seq,phone,last_login_at,registration_date")
       .eq("status", "approved")
       .neq("id", user.id);
     if (deliveredIds.length) {
@@ -176,11 +182,14 @@ function Dashboard() {
     }
     const { data, error } = await q.order("contact_seq");
     if (error) throw error;
-    return (data ?? []).map((r) => ({
-      id: r.id as string,
-      contact_seq: r.contact_seq as number,
-      phone: r.phone as string,
-    }));
+    return (data ?? [])
+      .filter((r) => isRecentlyActive(r as { last_login_at?: string | null; registration_date?: string | null }))
+      .map((r) => ({
+        id: r.id as string,
+        contact_seq: r.contact_seq as number,
+        phone: r.phone as string,
+      }));
+
   }
 
   async function recordDelivery(contacts: { id: string }[], kind: "first_community" | "new" | "complete") {
@@ -231,38 +240,7 @@ function Dashboard() {
     } finally { setBusy(null); }
   }
 
-  async function downloadFull() {
-    if (!stats || !user) return;
-    setBusy("full");
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id,contact_seq,phone")
-        .eq("status", "approved")
-        .neq("id", user.id)
-        .order("contact_seq");
-      if (error) throw error;
-      const contacts = (data ?? []).map((r) => ({
-        id: r.id as string,
-        contact_seq: r.contact_seq as number,
-        phone: r.phone as string,
-      }));
-      if (contacts.length < MIN_CONTACTS) {
-        toast.info(`Only ${contacts.length} approved contact${contacts.length === 1 ? "" : "s"} available. We need at least ${MIN_CONTACTS}.`);
-        return;
-      }
-      downloadVcf(
-        `status-connect-full-${contacts.length}contacts-v${stats.latestVersion}.vcf`,
-        generateVcf(contacts),
-      );
-      await recordDelivery(contacts, "complete");
-      toast.success(`Downloaded ${contacts.length} contacts`);
-      load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Download failed");
-    } finally { setBusy(null); }
-  }
-
+  /** Premium: download the reciprocal network — members who saved your number. */
   /** Premium: download the reciprocal network — members who received your number. */
   async function downloadNetwork() {
     if (!stats) return;
@@ -299,7 +277,6 @@ function Dashboard() {
   }
 
   const canDownloadNew = stats.newAvailable >= MIN_CONTACTS;
-  const noDownloadable = stats.total === 0;
   const isPremium = stats.membership === "premium";
 
   return (
@@ -316,25 +293,38 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground">Your ID: <span className="font-mono">{stats.userCode}</span></p>
       </div>
 
-      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
-        <p className="text-xs uppercase tracking-wide text-primary font-semibold">Contacts Ready to Save</p>
-        {stats.newAvailable > 0 ? (
-          <>
-            <p className="text-2xl font-semibold text-foreground">
-              {stats.newAvailable} new contact{stats.newAvailable === 1 ? "" : "s"} available
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {canDownloadNew
-                ? "Tap Download Community Contacts below to add them to your phone."
-                : `${MIN_CONTACTS - stats.newAvailable} more needed before your next download unlocks.`}
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-foreground">
-            Please return in 30 minutes to check for newly approved community members.
+      {isPremium ? (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+          <p className="text-xs uppercase tracking-wide text-primary font-semibold">Your Reciprocal Network</p>
+          <p className="text-2xl font-semibold text-foreground">
+            {downloaders.length} member{downloaders.length === 1 ? "" : "s"} saved your number
           </p>
-        )}
-      </div>
+          <p className="text-xs text-muted-foreground">
+            As a Premium member you download only your reciprocal contacts — the people who saved your number — so every save goes both ways.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+          <p className="text-xs uppercase tracking-wide text-primary font-semibold">Contacts Ready to Save</p>
+          {stats.newAvailable > 0 ? (
+            <>
+              <p className="text-2xl font-semibold text-foreground">
+                {stats.newAvailable} new contact{stats.newAvailable === 1 ? "" : "s"} available
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {canDownloadNew
+                  ? "Tap Download Community Contacts below to add them to your phone."
+                  : `${MIN_CONTACTS - stats.newAvailable} more needed before your next download unlocks.`}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-foreground">
+              Please return in 30 minutes to check for newly approved community members.
+            </p>
+          )}
+        </div>
+      )}
+
 
       {videoUrl && (
         <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -369,19 +359,16 @@ function Dashboard() {
         <StatCard label="Registered" value={stats.registrationDate ? new Date(stats.registrationDate).toLocaleDateString() : "—"} small />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Button size="lg" onClick={downloadNew} disabled={busy !== null || !canDownloadNew} className="sm:col-span-2 lg:col-span-1">
-          {stats.isFirstDownload ? <Sparkles className="h-4 w-4 mr-2" /> : <RefreshCcw className="h-4 w-4 mr-2" />}
-          {busy === "new" ? "Preparing…" : `Download Community Contacts${stats.newAvailable > 0 ? ` (${stats.newAvailable})` : ""}`}
-        </Button>
-        <Button size="lg" variant="outline" onClick={downloadFull} disabled={busy !== null || noDownloadable}>
-          <Download className="h-4 w-4 mr-2" />
-          {busy === "full" ? "Preparing…" : "Download Complete List"}
-        </Button>
-        {isPremium && (
-          <Button size="lg" variant="outline" onClick={downloadNetwork} disabled={busy !== null}>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {isPremium ? (
+          <Button size="lg" onClick={downloadNetwork} disabled={busy !== null} className="sm:col-span-2 lg:col-span-2">
             <Crown className="h-4 w-4 mr-2" />
-            {busy === "network" ? "Preparing…" : `My Reciprocal Network (${downloaders.length})`}
+            {busy === "network" ? "Preparing…" : `Download My Reciprocal Network (${downloaders.length})`}
+          </Button>
+        ) : (
+          <Button size="lg" onClick={downloadNew} disabled={busy !== null || !canDownloadNew} className="sm:col-span-2 lg:col-span-2">
+            {stats.isFirstDownload ? <Sparkles className="h-4 w-4 mr-2" /> : <RefreshCcw className="h-4 w-4 mr-2" />}
+            {busy === "new" ? "Preparing…" : `Download Community Contacts${stats.newAvailable > 0 ? ` (${stats.newAvailable})` : ""}`}
           </Button>
         )}
         <Link to="/download-history">
@@ -390,6 +377,7 @@ function Dashboard() {
           </Button>
         </Link>
       </div>
+
 
       <div className="rounded-lg border border-border bg-card">
         <div className="flex items-center justify-between p-4 border-b border-border">

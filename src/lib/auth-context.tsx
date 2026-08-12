@@ -7,6 +7,7 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
+  membership: "freemium" | "premium" | null;
 }
 
 const AuthCtx = createContext<AuthState>({
@@ -14,12 +15,14 @@ const AuthCtx = createContext<AuthState>({
   user: null,
   loading: true,
   isAdmin: false,
+  membership: null,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [membership, setMembership] = useState<"freemium" | "premium" | null>(null);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
@@ -34,6 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .eq("role", "admin")
             .maybeSingle();
           setIsAdmin(!!data);
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("membership")
+            .eq("id", s.user.id)
+            .maybeSingle();
+          setMembership(((prof?.membership as "freemium" | "premium") ?? "freemium"));
           if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
             await supabase.rpc("record_login");
             // Opportunistic sweep so inactive-user status stays fresh without an admin cron.
@@ -42,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, 0);
       } else {
         setIsAdmin(false);
+        setMembership(null);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
@@ -51,8 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+
   return (
-    <AuthCtx.Provider value={{ session, user: session?.user ?? null, loading, isAdmin }}>
+    <AuthCtx.Provider value={{ session, user: session?.user ?? null, loading, isAdmin, membership }}>
       {children}
     </AuthCtx.Provider>
   );
