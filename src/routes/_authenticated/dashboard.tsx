@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Download, RefreshCcw, History, Sparkles, Clock, Bell, Crown, ShieldCheck, PlayCircle } from "lucide-react";
+import { RefreshCcw, History, Sparkles, Clock, Bell, Crown, ShieldCheck, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { generateVcf, generateNamedVcf, downloadVcf } from "@/lib/vcf";
 import { logAudit } from "@/lib/audit";
@@ -241,8 +241,6 @@ function Dashboard() {
   }
 
   /** Premium: download the reciprocal network — members who saved your number. */
-
-
   /** Premium: download the reciprocal network — members who received your number. */
   async function downloadNetwork() {
     if (!stats) return;
@@ -279,7 +277,6 @@ function Dashboard() {
   }
 
   const canDownloadNew = stats.newAvailable >= MIN_CONTACTS;
-  const noDownloadable = stats.total === 0;
   const isPremium = stats.membership === "premium";
 
   return (
