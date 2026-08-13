@@ -196,7 +196,7 @@ function Dashboard() {
 
   }
 
-  async function recordDelivery(contacts: { id: string }[], kind: "first_community" | "new" | "complete") {
+  async function recordDelivery(contacts: { id: string }[], kind: "first_community" | "new" | "complete" | "reciprocal") {
     if (!user || !stats || contacts.length === 0) return;
     const rows = contacts.map((c) => ({ user_id: user.id, contact_id: c.id }));
     const CHUNK = 500;
@@ -250,16 +250,19 @@ function Dashboard() {
     if (!stats) return;
     setBusy("network");
     try {
-      const entries = downloaders
-        .filter((d) => d.phone)
-        .map((d) => ({ name: `Status Connect ${d.user_code}`, phone: d.phone }));
-      if (entries.length === 0) {
-        toast.info("No saves yet — your reciprocal network will appear here.");
+      // Never re-issue a contact this member has already downloaded.
+      const fresh = downloaders.filter((d) => d.phone && !savedIds.has(d.user_id));
+      const seen = new Set<string>();
+      const unique = fresh.filter((d) => (seen.has(d.user_id) ? false : (seen.add(d.user_id), true)));
+      if (unique.length === 0) {
+        toast.info("No new reciprocal contacts — you've already saved everyone who saved you.");
         return;
       }
+      const entries = unique.map((d) => ({ name: `Status Connect ${d.user_code}`, phone: d.phone }));
       downloadVcf(`status-connect-network-${entries.length}contacts.vcf`, generateNamedVcf(entries));
-      await logAudit("download_reciprocal_network", { count: entries.length });
+      await recordDelivery(unique.map((d) => ({ id: d.user_id })), "reciprocal");
       toast.success(`Downloaded ${entries.length} reciprocal contacts`);
+      load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Download failed");
     } finally { setBusy(null); }
