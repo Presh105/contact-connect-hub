@@ -143,6 +143,7 @@ function Dashboard() {
         const p = profilesById.get(r.user_id as string);
         return {
           id: r.id as string,
+          user_id: r.user_id as string,
           downloaded_at: r.downloaded_at as string,
           phone: p?.phone ?? "",
           user_code: p?.user_code ?? "—",
