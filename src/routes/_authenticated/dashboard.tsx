@@ -285,6 +285,9 @@ function Dashboard() {
 
   const canDownloadNew = stats.newAvailable >= MIN_CONTACTS;
   const isPremium = stats.membership === "premium";
+  const newReciprocal = new Set(
+    downloaders.filter((d) => d.phone && !savedIds.has(d.user_id)).map((d) => d.user_id),
+  ).size;
 
   return (
     <div className="space-y-6">
@@ -370,7 +373,7 @@ function Dashboard() {
         {isPremium ? (
           <Button size="lg" onClick={downloadNetwork} disabled={busy !== null} className="sm:col-span-2 lg:col-span-2">
             <Crown className="h-4 w-4 mr-2" />
-            {busy === "network" ? "Preparing…" : `Download My Reciprocal Network (${downloaders.length})`}
+            {busy === "network" ? "Preparing…" : `Download My Reciprocal Network (${newReciprocal})`}
           </Button>
         ) : (
           <Button size="lg" onClick={downloadNew} disabled={busy !== null || !canDownloadNew} className="sm:col-span-2 lg:col-span-2">
