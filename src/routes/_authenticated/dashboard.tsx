@@ -91,6 +91,7 @@ function Dashboard() {
       .select("contact_id")
       .eq("user_id", user.id);
     const deliveredIds = new Set((delivered ?? []).map((r) => r.contact_id as string));
+    setSavedIds(deliveredIds);
 
     // Only members who logged in within the last 7 days are eligible for community VCFs.
     const eligible = (activeRows ?? []).filter((r) =>
