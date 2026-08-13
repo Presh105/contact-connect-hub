@@ -33,6 +33,7 @@ interface Stats {
 
 interface Downloader {
   id: string;
+  user_id: string;
   downloaded_at: string;
   phone: string;
   user_code: string;
@@ -63,6 +64,7 @@ function Dashboard() {
   const [busy, setBusy] = useState<null | "new" | "full" | "network">(null);
   const [downloaders, setDownloaders] = useState<Downloader[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     if (!user) return;
