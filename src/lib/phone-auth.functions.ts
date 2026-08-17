@@ -38,7 +38,7 @@ async function signIn(phone: string): Promise<PhoneAuthResult> {
     phone: normalize(phone).slice(1),
     password: derivedSecret(phone),
   });
-  if (error || !data.session) return { ok: false, error: error?.message ?? "Could not sign in" };
+  if (error || !data.session) { console.error("[phone-auth] signIn failed", error); return { ok: false, error: error?.message ?? "Could not sign in" }; }
   return { ok: true, access_token: data.session.access_token, refresh_token: data.session.refresh_token };
 }
 
@@ -68,6 +68,7 @@ export const registerWithPhone = createServerFn({ method: "POST" })
       user_metadata: { full_name: fullName, phone, country: "Nigeria" },
     });
     if (error) {
+      console.error("[phone-auth] createUser failed", error);
       if (/already|registered|exists/i.test(error.message))
         return { ok: false, error: "This WhatsApp number is already registered. Please log in instead." };
       return { ok: false, error: error.message };
