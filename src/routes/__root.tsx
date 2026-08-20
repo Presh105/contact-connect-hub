@@ -138,7 +138,6 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AdScript />
         <Outlet />
         <Toaster />
       </AuthProvider>
