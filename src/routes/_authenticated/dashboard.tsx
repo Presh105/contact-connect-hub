@@ -727,13 +727,14 @@ function Dashboard() {
                 </p>
               </div>
 
-              <p className="mt-3 text-xs text-muted-foreground">
-                Please use <strong>StatusConnect</strong> and your
-                registered WhatsApp number in the payment description.
-                This helps us identify your payment.
-              </p>
-            </div>
-
-            {paymentPending && (
-              <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
-                <p className="font-semibold text-
+              {paymentPending && (
+  <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
+    <p className="font-semibold text-yellow-700 dark:text-yellow-400">
+      Payment notification pending
+    </p>
+    <p className="mt-1 text-sm text-muted-foreground">
+      Your payment notification has been sent to the administrator.
+      Please wait for confirmation.
+    </p>
+  </div>
+)}
