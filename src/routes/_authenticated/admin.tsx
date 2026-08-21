@@ -12,48 +12,58 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-// Change this passcode any time — it is required in addition to being the admin phone.
 const ADMIN_PASSCODE = "SC-ADMIN-2026";
 const ADMIN_PHONE = "09130762056";
 const GATE_KEY = "sc_admin_gate_ok";
 
 function AdminGate({ onUnlock }: { onUnlock: () => void }) {
   const [code, setCode] = useState("");
+
+  function unlock() {
+    if (code === ADMIN_PASSCODE) {
+      sessionStorage.setItem(GATE_KEY, "1");
+      onUnlock();
+    } else {
+      toast.error("Incorrect passcode");
+    }
+  }
+
   return (
     <div className="max-w-sm mx-auto py-16 space-y-4">
-      <h1 className="text-2xl font-semibold text-foreground">Admin access</h1>
-      <p className="text-sm text-muted-foreground">Enter the admin passcode to continue.</p>
+      <h1 className="text-2xl font-semibold text-foreground">
+        Admin access
+      </h1>
+
+      <p className="text-sm text-muted-foreground">
+        Enter the admin passcode to continue.
+      </p>
+
       <Input
         type="password"
         placeholder="Passcode"
         value={code}
         onChange={(e) => setCode(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            if (code === ADMIN_PASSCODE) {
-              sessionStorage.setItem(GATE_KEY, "1");
-              onUnlock();
-            } else toast.error("Incorrect passcode");
-          }
+          if (e.key === "Enter") unlock();
         }}
       />
-      <Button
-        className="w-full"
-        onClick={() => {
-          if (code === ADMIN_PASSCODE) {
-            sessionStorage.setItem(GATE_KEY, "1");
-            onUnlock();
-          } else toast.error("Incorrect passcode");
-        }}
-      >
+
+      <Button className="w-full" onClick={unlock}>
         Unlock
       </Button>
     </div>
   );
 }
 
-type Status = "pending" | "approved" | "rejected" | "suspended";
+type Status =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "suspended";
+
 type Membership = "freemium" | "premium";
+
+type PaymentStatus = "pending" | "approved" | "rejected";
 
 interface AdminStats {
   totalUsers: number;
@@ -88,31 +98,65 @@ interface Activity {
   user_id: string | null;
 }
 
+interface PaymentRequest {
+  id: string;
+  user_id: string;
+  phone: string;
+  full_name: string;
+  amount: number;
+  payment_description: string;
+  status: PaymentStatus;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+}
+
 function AdminPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [paymentRequests, setPaymentRequests] = useState<
+    PaymentRequest[]
+  >([]);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Status | "all">("all");
+
   const [publishing, setPublishing] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [savingVideo, setSavingVideo] = useState(false);
+
+  const [processingPayment, setProcessingPayment] =
+    useState<string | null>(null);
+
   const [unlocked, setUnlocked] = useState(() =>
-    typeof window !== "undefined" && sessionStorage.getItem(GATE_KEY) === "1",
+    typeof window !== "undefined" &&
+    sessionStorage.getItem(GATE_KEY) === "1",
   );
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (!loading && !user) {
+      navigate({ to: "/auth" });
+    }
   }, [loading, user, navigate]);
 
-
-
   async function load() {
-    const dayAgo = new Date(Date.now() - 86400000).toISOString();
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-    const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+    if (!user) return;
+
+    const dayAgo = new Date(
+      Date.now() - 86400000,
+    ).toISOString();
+
+    const weekAgo = new Date(
+      Date.now() - 7 * 86400000,
+    ).toISOString();
+
+    const monthAgo = new Date(
+      Date.now() - 30 * 86400000,
+    ).toISOString();
 
     const [
       { count: total },
@@ -127,17 +171,92 @@ function AdminPage() {
       { count: week },
       { count: month },
     ] = await Promise.all([
-      supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "approved"),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "rejected"),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("status", "suspended"),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("membership", "premium"),
-      supabase.from("contact_versions").select("version_number").order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("downloads").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).gte("registration_date", dayAgo),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).gte("registration_date", weekAgo),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).gte("registration_date", monthAgo),
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "approved"),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "pending"),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "rejected"),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "suspended"),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("membership", "premium"),
+
+      supabase
+        .from("contact_versions")
+        .select("version_number")
+        .order("version_number", {
+          ascending: false,
+        })
+        .limit(1)
+        .maybeSingle(),
+
+      supabase
+        .from("downloads")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .gte("registration_date", dayAgo),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .gte("registration_date", weekAgo),
+
+      supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .gte("registration_date", monthAgo),
     ]);
 
     setStats({
@@ -156,244 +275,610 @@ function AdminPage() {
 
     const { data: usersData } = await supabase
       .from("profiles")
-      .select("id,user_code,full_name,phone,country,status,membership,registration_date,total_contacts_received")
-      .order("registration_date", { ascending: false })
+      .select(
+        "id,user_code,full_name,phone,country,status,membership,registration_date,total_contacts_received",
+      )
+      .order("registration_date", {
+        ascending: false,
+      })
       .limit(300);
+
     setUsers((usersData as UserRow[]) ?? []);
 
     const { data: act } = await supabase
       .from("audit_log")
-      .select("id,action,created_at,user_id")
-      .order("created_at", { ascending: false })
+      .select(
+        "id,action,created_at,user_id",
+      )
+      .order("created_at", {
+        ascending: false,
+      })
       .limit(20);
+
     setActivity((act as Activity[]) ?? []);
+
+    /*
+     * Premium payment requests.
+     *
+     * Pending requests are shown first so the administrator
+     * can review them immediately.
+     */
+    const { data: payments, error: paymentsError } =
+      await supabase
+        .from("premium_payment_requests")
+        .select(
+          "id,user_id,phone,full_name,amount,payment_description,status,created_at,reviewed_at,reviewed_by",
+        )
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(100);
+
+    if (paymentsError) {
+      console.error(
+        "Could not load Premium payment requests:",
+        paymentsError,
+      );
+    }
+
+    setPaymentRequests(
+      (payments as PaymentRequest[]) ?? [],
+    );
 
     const { data: setting } = await supabase
       .from("app_settings")
       .select("value")
       .eq("key", "tutorial_video_url")
       .maybeSingle();
-    setVideoUrl((setting?.value as string) ?? "");
+
+    setVideoUrl(
+      (setting?.value as string) ?? "",
+    );
   }
 
   async function saveVideoUrl() {
-    if (videoUrl.trim() && !toYouTubeEmbed(videoUrl)) {
-      return toast.error("That doesn't look like a YouTube link");
+    if (
+      videoUrl.trim() &&
+      !toYouTubeEmbed(videoUrl)
+    ) {
+      return toast.error(
+        "That doesn't look like a YouTube link",
+      );
     }
+
     setSavingVideo(true);
+
     const { error } = await supabase
       .from("app_settings")
-      .upsert({ key: "tutorial_video_url", value: videoUrl.trim() }, { onConflict: "key" });
+      .upsert(
+        {
+          key: "tutorial_video_url",
+          value: videoUrl.trim(),
+        },
+        {
+          onConflict: "key",
+        },
+      );
+
     setSavingVideo(false);
-    if (error) return toast.error(error.message);
-    await logAudit("admin_set_tutorial_video");
-    toast.success("Tutorial video saved — it now shows on every member dashboard");
+
+    if (error) {
+      return toast.error(error.message);
+    }
+
+    await logAudit(
+      "admin_set_tutorial_video",
+    );
+
+    toast.success(
+      "Tutorial video saved — it now shows on every member dashboard",
+    );
   }
 
-
-  useEffect(() => { if (user && unlocked) load(); }, [user?.id, unlocked]);
+  useEffect(() => {
+    if (user && unlocked) {
+      load();
+    }
+  }, [user?.id, unlocked]);
 
   async function publish() {
     setPublishing(true);
+
     try {
-      const { error } = await supabase.rpc("publish_new_version");
+      const { error } = await supabase.rpc(
+        "publish_new_version",
+      );
+
       if (error) throw error;
-      await logAudit("admin_publish_version");
-      toast.success("New contact version published");
-      load();
+
+      await logAudit(
+        "admin_publish_version",
+      );
+
+      toast.success(
+        "New contact version published",
+      );
+
+      await load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed");
-    } finally { setPublishing(false); }
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Failed",
+      );
+    } finally {
+      setPublishing(false);
+    }
   }
 
-  async function setStatus(u: UserRow, next: Status) {
-    const { error } = await supabase.from("profiles").update({ status: next }).eq("id", u.id);
-    if (error) return toast.error(error.message);
-    await logAudit(`admin_status_${next}`, { target: u.id });
-    toast.success(`${u.user_code} → ${next}`);
-    load();
+  async function approvePayment(
+    payment: PaymentRequest,
+  ) {
+    if (payment.status !== "pending") {
+      toast.info(
+        "This payment request has already been reviewed.",
+      );
+      return;
+    }
+
+    const confirmed = confirm(
+      `Approve the ₦${Number(payment.amount).toLocaleString()} Premium payment from ${payment.full_name}?`,
+    );
+
+    if (!confirmed) return;
+
+    setProcessingPayment(payment.id);
+
+    try {
+      const { error } = await supabase.rpc(
+        "approve_premium_payment",
+        {
+          payment_id: payment.id,
+        },
+      );
+
+      if (error) throw error;
+
+      await logAudit(
+        "admin_approve_premium_payment",
+        {
+          payment_id: payment.id,
+          user_id: payment.user_id,
+          amount: payment.amount,
+        },
+      );
+
+      toast.success(
+        `${payment.full_name} is now a Premium member for 30 days.`,
+      );
+
+      await load();
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Could not approve payment",
+      );
+    } finally {
+      setProcessingPayment(null);
+    }
   }
 
-  async function setMembership(u: UserRow, next: Membership) {
-    const { error } = await supabase.from("profiles").update({ membership: next }).eq("id", u.id);
-    if (error) return toast.error(error.message);
-    await logAudit(`admin_membership_${next}`, { target: u.id });
-    toast.success(`${u.user_code} → ${next}`);
-    load();
+  async function rejectPayment(
+    payment: PaymentRequest,
+  ) {
+    if (payment.status !== "pending") {
+      toast.info(
+        "This payment request has already been reviewed.",
+      );
+      return;
+    }
+
+    const confirmed = confirm(
+      `Reject the Premium payment notification from ${payment.full_name}?`,
+    );
+
+    if (!confirmed) return;
+
+    setProcessingPayment(payment.id);
+
+    try {
+      const { error } = await supabase.rpc(
+        "reject_premium_payment",
+        {
+          payment_id: payment.id,
+        },
+      );
+
+      if (error) throw error;
+
+      await logAudit(
+        "admin_reject_premium_payment",
+        {
+          payment_id: payment.id,
+          user_id: payment.user_id,
+          amount: payment.amount,
+        },
+      );
+
+      toast.success(
+        "Premium payment request rejected.",
+      );
+
+      await load();
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Could not reject payment",
+      );
+    } finally {
+      setProcessingPayment(null);
+    }
+  }
+
+  async function setStatus(
+    u: UserRow,
+    next: Status,
+  ) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        status: next,
+      })
+      .eq("id", u.id);
+
+    if (error) {
+      return toast.error(error.message);
+    }
+
+    await logAudit(
+      `admin_status_${next}`,
+      {
+        target: u.id,
+      },
+    );
+
+    toast.success(
+      `${u.user_code} → ${next}`,
+    );
+
+    await load();
+  }
+
+  async function setMembership(
+    u: UserRow,
+    next: Membership,
+  ) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        membership: next,
+      })
+      .eq("id", u.id);
+
+    if (error) {
+      return toast.error(error.message);
+    }
+
+    await logAudit(
+      `admin_membership_${next}`,
+      {
+        target: u.id,
+      },
+    );
+
+    toast.success(
+      `${u.user_code} → ${next}`,
+    );
+
+    await load();
   }
 
   async function del(u: UserRow) {
-    if (!confirm(`Delete ${u.user_code} — ${u.full_name}? This removes their profile.`)) return;
-    const { error } = await supabase.from("profiles").delete().eq("id", u.id);
-    if (error) return toast.error(error.message);
-    await logAudit("admin_delete_user", { target: u.id });
+    if (
+      !confirm(
+        `Delete ${u.user_code} — ${u.full_name}? This removes their profile.`,
+      )
+    ) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", u.id);
+
+    if (error) {
+      return toast.error(error.message);
+    }
+
+    await logAudit(
+      "admin_delete_user",
+      {
+        target: u.id,
+      },
+    );
+
     toast.success("User deleted");
-    load();
+
+    await load();
   }
 
   function exportCsv() {
-    const header = ["user_code", "full_name", "phone", "country", "status", "membership", "registration_date", "total_contacts_received"];
-    const rows = users.map((u) => header.map((h) => JSON.stringify((u as unknown as Record<string, unknown>)[h] ?? "")).join(","));
-    const csv = [header.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "status-connect-users.csv"; a.click();
+    const header = [
+      "user_code",
+      "full_name",
+      "phone",
+      "country",
+      "status",
+      "membership",
+      "registration_date",
+      "total_contacts_received",
+    ];
+
+    const rows = users.map((u) =>
+      header
+        .map((h) =>
+          JSON.stringify(
+            (
+              u as unknown as Record<
+                string,
+                unknown
+              >
+            )[h] ?? "",
+          ),
+        )
+        .join(","),
+    );
+
+    const csv = [
+      header.join(","),
+      ...rows,
+    ].join("\n");
+
+    const blob = new Blob(
+      [csv],
+      {
+        type: "text/csv",
+      },
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+    a.download =
+      "status-connect-users.csv";
+
+    a.click();
+
     URL.revokeObjectURL(url);
   }
 
   const filtered = users.filter((u) => {
-    if (filter !== "all" && u.status !== filter) return false;
+    if (
+      filter !== "all" &&
+      u.status !== filter
+    ) {
+      return false;
+    }
+
     if (!search) return true;
-    const s = search.toLowerCase();
-    return u.user_code.toLowerCase().includes(s) || u.full_name.toLowerCase().includes(s) || u.phone.includes(s);
+
+    const s =
+      search.toLowerCase();
+
+    return (
+      u.user_code
+        .toLowerCase()
+        .includes(s) ||
+      u.full_name
+        .toLowerCase()
+        .includes(s) ||
+      u.phone.includes(s)
+    );
   });
 
-  if (loading || !user) return <p className="text-sm text-muted-foreground">Loading…</p>;
-  if (!unlocked) return <AdminGate onUnlock={() => setUnlocked(true)} />;
-  if (!stats) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  const pendingPayments =
+    paymentRequests.filter(
+      (p) => p.status === "pending",
+    );
+
+  if (
+    loading ||
+    !user
+  ) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Loading…
+      </p>
+    );
+  }
+
+  if (!unlocked) {
+    return (
+      <AdminGate
+        onUnlock={() =>
+          setUnlocked(true)
+        }
+      />
+    );
+  }
+
+  if (!stats) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Loading…
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-6">
+
+      {/* HEADER */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-semibold">Admin</h1>
-        <Button onClick={publish} disabled={publishing}>
-          {publishing ? "Publishing…" : "Publish new contact version"}
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Admin
+          </h1>
+
+          <p className="text-sm text-muted-foreground">
+            Manage StatusConnect members,
+            Premium payments and contact versions.
+          </p>
+        </div>
+
+        <Button
+          onClick={publish}
+          disabled={publishing}
+        >
+          {publishing
+            ? "Publishing…"
+            : "Publish new contact version"}
         </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-        <div>
-          <h2 className="font-semibold text-foreground">Tutorial video (members' dashboard)</h2>
-          <p className="text-sm text-muted-foreground">
-            Paste a YouTube link showing how to install the VCF file and save the contacts. It appears on every member's dashboard. Leave empty to hide it.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Input
-            placeholder="https://www.youtube.com/watch?v=..."
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            className="max-w-md"
-          />
-          <Button onClick={saveVideoUrl} disabled={savingVideo}>{savingVideo ? "Saving…" : "Save video"}</Button>
-        </div>
-        {toYouTubeEmbed(videoUrl) && (
-          <div className="relative w-full max-w-md" style={{ paddingTop: "31.6%" }}>
-            <iframe
-              src={toYouTubeEmbed(videoUrl)!}
-              title="Tutorial preview"
-              className="absolute inset-0 h-full w-full rounded-md"
-              allowFullScreen
-            />
+      {/* PREMIUM PAYMENT REQUESTS */}
+      <div className="rounded-lg border border-primary/30 bg-primary/5 overflow-hidden">
+
+        <div className="p-4 border-b border-primary/20 flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="font-semibold text-foreground">
+              Premium Payment Requests
+            </h2>
+
+            <p className="text-sm text-muted-foreground">
+              Review members who have notified you
+              about their ₦2,000 Premium payment.
+            </p>
           </div>
-        )}
-      </div>
 
-
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-        <Stat label="Total users" value={stats.totalUsers} />
-        <Stat label="Approved" value={stats.approved} />
-        <Stat label="Pending" value={stats.pending} accent={stats.pending > 0} />
-        <Stat label="Rejected" value={stats.rejected} />
-        <Stat label="Suspended" value={stats.suspended} />
-        <Stat label="Premium members" value={stats.premium} />
-        <Stat label="Current version" value={`v${stats.latestVersion}`} />
-        <Stat label="Total downloads" value={stats.totalDownloads} />
-        <Stat label="Today / week / month" value={`${stats.today} / ${stats.thisWeek} / ${stats.thisMonth}`} />
-      </div>
-
-      <div className="rounded-lg border border-border bg-card">
-        <div className="p-4 flex flex-wrap items-center gap-2 border-b border-border">
-          <Input placeholder="Search by code, name, phone…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
-          <select value={filter} onChange={(e) => setFilter(e.target.value as Status | "all")} className="h-9 rounded-md border border-input bg-background px-2 text-sm">
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="suspended">Suspended</option>
-          </select>
-          <Button variant="outline" size="sm" onClick={exportCsv}>Export CSV</Button>
+          {pendingPayments.length > 0 && (
+            <span className="inline-flex items-center rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400">
+              {pendingPayments.length} pending
+            </span>
+          )}
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-muted-foreground border-b border-border">
-              <tr>
-                <th className="p-3">Code</th>
-                <th className="p-3">Name</th>
-                <th className="p-3">Phone</th>
-                <th className="p-3">Country</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Membership</th>
-                <th className="p-3">Joined</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((u) => (
-                <tr key={u.id} className="border-b border-border last:border-0 align-top">
-                  <td className="p-3 font-mono text-xs">{u.user_code}</td>
-                  <td className="p-3">{u.full_name}</td>
-                  <td className="p-3 font-mono text-xs">{u.phone}</td>
-                  <td className="p-3">{u.country}</td>
-                  <td className="p-3"><StatusBadge status={u.status} /></td>
-                  <td className="p-3">
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs capitalize ${u.membership === "premium" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {u.membership}
-                    </span>
-                  </td>
-                  <td className="p-3 text-xs text-muted-foreground">{new Date(u.registration_date).toLocaleDateString()}</td>
-                  <td className="p-3 text-right whitespace-nowrap space-x-1">
-                    {u.status !== "approved" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "approved")}>Approve</Button>}
-                    {u.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "rejected")}>Reject</Button>}
-                    {u.status !== "suspended" && <Button size="sm" variant="ghost" onClick={() => setStatus(u, "suspended")}>Suspend</Button>}
-                    <Button size="sm" variant="ghost" onClick={() => setMembership(u, u.membership === "premium" ? "freemium" : "premium")}>
-                      {u.membership === "premium" ? "Downgrade" : "Make premium"}
-                    </Button>
-                    <Link to="/admin/user/$id" params={{ id: u.id }}><Button size="sm" variant="ghost">View</Button></Link>
-                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => del(u)}>Delete</Button>
-                  </td>
+
+        {paymentRequests.length === 0 ? (
+          <div className="p-6 text-center text-sm text-muted-foreground">
+            No Premium payment requests yet.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+
+              <thead className="text-left text-xs uppercase text-muted-foreground border-b border-border">
+                <tr>
+                  <th className="p-3">
+                    Member
+                  </th>
+
+                  <th className="p-3">
+                    WhatsApp
+                  </th>
+
+                  <th className="p-3">
+                    Amount
+                  </th>
+
+                  <th className="p-3">
+                    Description
+                  </th>
+
+                  <th className="p-3">
+                    Date
+                  </th>
+
+                  <th className="p-3">
+                    Status
+                  </th>
+
+                  <th className="p-3 text-right">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">No users</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              </thead>
 
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h2 className="font-semibold mb-2">Recent activity</h2>
-        <ul className="text-sm divide-y divide-border">
-          {activity.map((a) => (
-            <li key={a.id} className="py-2 flex justify-between gap-3">
-              <span className="font-mono text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}</span>
-              <span className="flex-1 truncate">{a.action}</span>
-            </li>
-          ))}
-          {activity.length === 0 && <li className="py-4 text-center text-muted-foreground text-sm">No activity yet</li>}
-        </ul>
-      </div>
-    </div>
-  );
-}
+              <tbody>
+                {paymentRequests.map(
+                  (payment) => {
+                    const processing =
+                      processingPayment ===
+                      payment.id;
 
-function StatusBadge({ status }: { status: Status }) {
-  const map: Record<Status, string> = {
-    approved: "bg-primary/10 text-primary",
-    pending: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-    rejected: "bg-destructive/10 text-destructive",
-    suspended: "bg-muted text-muted-foreground",
-  };
-  return <span className={`inline-block px-2 py-0.5 rounded text-xs capitalize ${map[status]}`}>{status}</span>;
-}
+                    return (
+                      <tr
+                        key={payment.id}
+                        className="border-b border-border last:border-0 align-top"
+                      >
+                        <td className="p-3">
+                          <div className="font-medium">
+                            {payment.full_name}
+                          </div>
 
-function Stat({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) {
-  return (
-    <div className={`rounded-lg border p-3 ${accent ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
-    </div>
-  );
-}
+                          <div className="text-xs text-muted-foreground font-mono">
+                            {payment.user_id}
+                          </div>
+                        </td>
+
+                        <td className="p-3 font-mono text-xs">
+                          {payment.phone}
+                        </td>
+
+                        <td className="p-3 font-semibold">
+                          ₦
+                          {Number(
+                            payment.amount,
+                          ).toLocaleString()}
+                        </td>
+
+                        <td className="p-3">
+                          <span className="font-mono text-xs">
+                            {payment.payment_description}
+                          </span>
+                        </td>
+
+                        <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(
+                            payment.created_at,
+                          ).toLocaleString()}
+                        </td>
+
+                        <td className="p-3">
+                          <PaymentStatusBadge
+                            status={
+                              payment.status
+                            }
+                          />
+                        </td>
+
+                        <td className="p-3 text-right whitespace-nowrap">
+
+                          {payment.status ===
+                            "pending" && (
+                            <div className="flex justify-end gap-1">
+
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  approvePayment(
+                                    payment,
+                                  )
+                                }
+                                disabled={
+                                  processing
+                                }
+                              >
+                                {processing
+                                  ? "Processing…"
+                                  : "Approve"}
+                              </Button>
+
+                              <Button
+                           
