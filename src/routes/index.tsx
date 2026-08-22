@@ -469,13 +469,46 @@ function Landing() {
             <img src="/favicon.png" alt="" width={20} height={20} className="h-5 w-5 rounded" />
             <span>© {new Date().getFullYear()} Status Connect · Nigeria's WhatsApp business network</span>
           </div>
-          <nav aria-label="Footer" className="flex gap-4">
-            <a href="#how-it-works" className="hover:text-foreground">How it works</a>
-            <a href="#tutorial" className="hover:text-foreground">Tutorial</a>
-            <a href="#membership" className="hover:text-foreground">Membership</a>
-            <Link to="/blog" className="hover:text-foreground">Blog</Link>
-            <a href="#faq" className="hover:text-foreground">FAQ</a>
-          </nav>
+          <nav
+  aria-label="Footer"
+  className="flex flex-wrap justify-center gap-x-4 gap-y-2"
+>
+  <a href="#how-it-works" className="hover:text-foreground">
+    How it works
+  </a>
+
+  <a href="#tutorial" className="hover:text-foreground">
+    Tutorial
+  </a>
+
+  <a href="#membership" className="hover:text-foreground">
+    Membership
+  </a>
+
+  <Link to="/blog" className="hover:text-foreground">
+    Blog
+  </Link>
+
+  <Link to="/about" className="hover:text-foreground">
+    About
+  </Link>
+
+  <Link to="/contact" className="hover:text-foreground">
+    Contact
+  </Link>
+
+  <Link to="/privacy" className="hover:text-foreground">
+    Privacy Policy
+  </Link>
+
+  <Link to="/terms" className="hover:text-foreground">
+    Terms
+  </Link>
+
+  <a href="#faq" className="hover:text-foreground">
+    FAQ
+  </a>
+</nav>
         </div>
       </footer>
     </div>
