@@ -15,11 +15,11 @@ export const Route = createFileRoute("/blog/")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/blog" },
+      { property: "og:url", content: "https://statusconnect.com.ng/blog" },
       { name: "twitter:title", content: TITLE },
       { name: "twitter:description", content: DESCRIPTION },
     ],
-    links: [{ rel: "canonical", href: "/blog" }],
+    links: [{ rel: "canonical", href: "https://statusconnect.com.ng/blog" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/blog/")({
             headline: p.title,
             description: p.description,
             datePublished: p.date,
-            url: `/blog/${p.slug}`,
+            url: `https://statusconnect.com.ng/blog/${p.slug}`,
           })),
         }),
       },
@@ -59,7 +59,7 @@ function BlogIndex() {
         <p className="mt-3 text-muted-foreground max-w-2xl">{DESCRIPTION}</p>
 
         <div className="mt-10 grid gap-4">
-          {BLOG_POSTS.map((p) => (
+          {[...BLOG_POSTS].sort((a, b) => b.date.localeCompare(a.date)).map((p) => (
             <article key={p.slug} className="rounded-xl border border-border bg-card p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 {new Date(p.date).toLocaleDateString()} · {p.readMinutes} min read
@@ -79,4 +79,4 @@ function BlogIndex() {
       </main>
     </div>
   );
-}
+    }
