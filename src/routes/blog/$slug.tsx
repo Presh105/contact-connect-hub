@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { getPost, BLOG_POSTS } from "@/lib/blog-posts";
+import { getPost, getRelatedPosts } from "@/lib/blog-posts";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/blog/$slug")({
     const post = loaderData?.post ?? getPost(params.slug);
     const title = post ? `${post.title} — Status Connect` : "Article — Status Connect";
     const description = post?.description ?? "Status Connect article.";
-    const url = `/blog/${params.slug}`;
+    const url = `https://statusconnect.com.ng/blog/${params.slug}`;
     return {
       meta: [
         { title },
@@ -61,7 +61,7 @@ function Missing() {
 
 function BlogPostPage() {
   const { post } = Route.useLoaderData();
-  const others = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const others = getRelatedPosts(post.slug, 4);
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,7 +103,7 @@ function BlogPostPage() {
 
         {others.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-lg font-semibold text-foreground">Keep reading</h2>
+            <h2 className="text-lg font-semibold text-foreground">Related articles</h2>
             <ul className="mt-3 space-y-2">
               {others.map((p) => (
                 <li key={p.slug}>
@@ -116,4 +116,4 @@ function BlogPostPage() {
       </main>
     </div>
   );
-}
+        }
