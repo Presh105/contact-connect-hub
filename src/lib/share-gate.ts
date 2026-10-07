@@ -63,48 +63,27 @@ export function buildStatusText(s: ShareSettings) {
   return m.includes(s.link) ? m : `${m}\n${s.link}`;
 }
 
-/** Downloads the promo picture so it can be attached to the share. */
-export async function loadShareImage(url: string): Promise<File | null> {
-  if (!url) return null;
-  try {
-    const r = await fetch(url, { mode: "cors" });
-    if (!r.ok) return null;
-    const b = await r.blob();
-    const ext = b.type.includes("png") ? "png" : "jpg";
-    return new File([b], `status-connect.${ext}`, { type: b.type || "image/jpeg" });
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Opens the phone's share sheet (or WhatsApp) with the predefined message.
- * WhatsApp has no link that opens "My status" directly, so on Android the
- * person picks WhatsApp -> "My status" in the share sheet.
- *  - "shared"    share sheet completed
- *  - "cancelled" person closed the share sheet
- *  - "fallback"  opened WhatsApp via link (cannot tell if they posted)
+ * Opens WhatsApp directly with the predefined message (no browser share menu).
+ * WhatsApp has no link that jumps straight into the Status composer, so the
+ * person picks "My status" at the top of WhatsApp's share screen, then taps send.
+ * If the WhatsApp app is not installed / does not open, falls back to WhatsApp web link.
  */
-export async function shareToStatus(
-  s: ShareSettings,
-  image: File | null,
-): Promise<"shared" | "cancelled" | "fallback"> {
-  const text = buildStatusText(s);
-  const nav = typeof navigator !== "undefined" ? (navigator as any) : null;
+export function shareToStatus(s: ShareSettings): void {
+  const text = encodeURIComponent(buildStatusText(s));
+  const web = `https://api.whatsapp.com/send?text=${text}`;
 
-  try {
-    if (nav?.share) {
-      if (image && nav.canShare?.({ files: [image] })) {
-        await nav.share({ files: [image], text });
-        return "shared";
-      }
-      await nav.share({ text });
-      return "shared";
-    }
-  } catch (e: any) {
-    if (e?.name === "AbortError") return "cancelled";
+  if (typeof window === "undefined") return;
+
+  const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (!mobile) {
+    window.open(web, "_blank");
+    return;
   }
 
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  return "fallback";
+  // Try the app first; if the page is still visible shortly after, use the web link.
+  window.location.href = `whatsapp://send?text=${text}`;
+  window.setTimeout(() => {
+    if (document.visibilityState === "visible") window.location.href = web;
+  }, 1500);
 }
