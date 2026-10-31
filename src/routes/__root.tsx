@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE, abs } from "@/lib/site";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -103,6 +104,7 @@ export const Route =
         { rel: "icon", href: "/favicon.png", type: "image/png" },
         { rel: "apple-touch-icon", href: "/favicon.png" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://pagead2.googlesyndication.com" },
       ],
 
       scripts: [
@@ -117,8 +119,12 @@ export const Route =
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "Status Connect",
-            url: "/",
-            logo: "/favicon.png",
+            url: SITE.url,
+            logo: abs("/favicon.png"),
+            email: SITE.email,
+            founder: { "@type": "Person", name: SITE.founder },
+            address: { "@type": "PostalAddress", addressLocality: "Lagos", addressCountry: "NG" },
+            contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: SITE.email, areaServed: "NG", availableLanguage: "English" },
             description:
               "Nigeria's largest WhatsApp business networking platform where entrepreneurs, business owners, freelancers, students, content creators, vendors, and professionals exchange verified WhatsApp contacts.",
             areaServed: "NG",

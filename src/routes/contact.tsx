@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteFooter } from "@/components/site-footer";
+import { SITE, abs } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { Mail, MessageCircle } from "lucide-react";
 
@@ -12,7 +14,9 @@ export const Route = createFileRoute("/contact")({
         content:
           "Contact Status Connect for questions, support and enquiries about the WhatsApp business networking community.",
       },
+      { property: "og:url", content: abs("/contact") },
     ],
+    links: [{ rel: "canonical", href: abs("/contact") }],
   }),
 });
 
@@ -114,6 +118,13 @@ function ContactPage() {
           </div>
         </div>
 
+        <div className="mt-5 rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground">Where we are</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {SITE.name} is operated by {SITE.founder} from {SITE.location}. We reply to emails and WhatsApp messages within one to two working days.
+          </p>
+        </div>
+
         <div className="mt-10 rounded-2xl border border-border bg-muted/30 p-6">
           <h2 className="text-xl font-bold text-foreground">
             What can we help with?
@@ -127,11 +138,7 @@ function ContactPage() {
         </div>
       </main>
 
-      <footer className="border-t border-border py-8">
-        <div className="mx-auto max-w-6xl px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Status Connect
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
             }

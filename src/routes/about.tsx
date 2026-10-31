@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteFooter } from "@/components/site-footer";
+import { SITE, abs } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import {
   BadgeCheck,
@@ -21,7 +23,10 @@ export const Route = createFileRoute("/about")({
         content:
           "Learn about Status Connect, a Nigerian WhatsApp business networking platform helping entrepreneurs, vendors, freelancers and professionals expand their business network.",
       },
+      { property: "og:url", content: abs("/about") },
+      { property: "og:image", content: abs(SITE.defaultImage) },
     ],
+    links: [{ rel: "canonical", href: abs("/about") }],
   }),
 });
 
@@ -121,6 +126,33 @@ function AboutPage() {
                 accessible to people who want to participate without paying.
               </p>
             </section>
+
+            <section>
+              <h2 className="text-2xl font-bold">Who runs Status Connect</h2>
+              <p className="mt-3 leading-7 text-muted-foreground">
+                Status Connect is run by <strong className="text-foreground">{SITE.founder}</strong>, {SITE.founderRole.toLowerCase()}, based in {SITE.location}. {SITE.founderBio}
+              </p>
+              <p className="mt-3 leading-7 text-muted-foreground">
+                You can reach us at <a className="text-primary underline underline-offset-2" href={`mailto:${SITE.email}`}>{SITE.email}</a> or through the official WhatsApp numbers on the <Link to="/contact" className="text-primary underline underline-offset-2">contact page</Link>.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold">How we create our guides</h2>
+              <p className="mt-3 leading-7 text-muted-foreground">
+                Every article on the <Link to="/blog" className="text-primary underline underline-offset-2">Status Connect blog</Link> is written to answer a real question Nigerian business owners ask: how to set up WhatsApp Business, how to fix a VCF import, how to avoid scams, how to price and get paid. We test the steps on current Android and iPhone versions, link to official sources such as WhatsApp's help centre where they exist, and update articles when WhatsApp changes how a feature works. Each article shows its published and last-updated dates.
+              </p>
+              <p className="mt-3 leading-7 text-muted-foreground">
+                Our guides are for general information. They are not legal, tax or financial advice.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold">How Status Connect is funded</h2>
+              <p className="mt-3 leading-7 text-muted-foreground">
+                The community is free to join. We fund the platform through optional Premium membership and through advertising displayed on our public pages, including Google AdSense. Advertising never decides what we write, and we do not accept payment to publish favourable reviews.
+              </p>
+            </section>
           </div>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,12 +224,7 @@ function AboutPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border py-8">
-        <div className="mx-auto max-w-6xl px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Status Connect · Nigeria's WhatsApp
-          business network
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
     }

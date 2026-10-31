@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/accordion";
 import heroImage from "@/assets/hero.jpg";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import { SITE, abs } from "@/lib/site";
+import { SiteFooter } from "@/components/site-footer";
 import { ShareBanner } from "@/components/share-banner";
 
 const TITLE = "Status Connect — Grow Your WhatsApp Business Network Across Nigeria";
@@ -111,16 +113,16 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: "/" },
-      { property: "og:image", content: "/og-image.jpg" },
+      { property: "og:url", content: abs("/") },
+      { property: "og:image", content: abs("/og-image.jpg") },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "Status Connect — Grow your WhatsApp business network in Nigeria" },
       { name: "twitter:title", content: TITLE },
       { name: "twitter:description", content: DESCRIPTION },
-      { name: "twitter:image", content: "/og-image.jpg" },
+      { name: "twitter:image", content: abs("/og-image.jpg") },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: abs("/") }],
     scripts: [
       {
         type: "application/ld+json",
@@ -130,19 +132,19 @@ export const Route = createFileRoute("/")({
             {
               "@type": "WebSite",
               name: "Status Connect",
-              url: "/",
+              url: abs("/"),
               description: DESCRIPTION,
               inLanguage: "en-NG",
               potentialAction: {
                 "@type": "SearchAction",
-                target: "/?q={search_term_string}",
+                target: abs("/?q={search_term_string}"),
                 "query-input": "required name=search_term_string",
               },
             },
             {
               "@type": "WebApplication",
               name: "Status Connect",
-              url: "/",
+              url: abs("/"),
               applicationCategory: "BusinessApplication",
               operatingSystem: "Any",
               offers: { "@type": "Offer", price: "0", priceCurrency: "NGN" },
@@ -404,12 +406,17 @@ function Landing() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {BLOG_POSTS.slice(0, 3).map((p) => (
-                <article key={p.slug} className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{p.readMinutes} min read</p>
-                  <h3 className="mt-2 font-semibold text-foreground">
-                    <Link to="/blog/$slug" params={{ slug: p.slug }} className="hover:text-primary">{p.title}</Link>
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{p.description}</p>
+                <article key={p.slug} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                  <Link to="/blog/$slug" params={{ slug: p.slug }}>
+                    <img src={p.image} alt={p.imageAlt} width={1200} height={630} loading="lazy" className="aspect-[1200/630] w-full object-cover" />
+                  </Link>
+                  <div className="p-5">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{p.readMinutes} min read</p>
+                    <h3 className="mt-2 font-semibold text-foreground">
+                      <Link to="/blog/$slug" params={{ slug: p.slug }} className="hover:text-primary">{p.title}</Link>
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{p.description}</p>
+                  </div>
                 </article>
               ))}
             </div>
@@ -436,50 +443,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border py-8">
-        <div className="mx-auto max-w-6xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <img src="/favicon.png" alt="" width={20} height={20} className="h-5 w-5 rounded" />
-            <span>© {new Date().getFullYear()} Status Connect · Nigeria's WhatsApp business network</span>
-          </div>
-          <nav
-  aria-label="Footer"
-  className="flex flex-wrap justify-center gap-x-4 gap-y-2"
->
-  <a href="#how-it-works" className="hover:text-foreground">
-    How it works
-  </a>
-
-  <a href="#membership" className="hover:text-foreground">
-    Membership
-  </a>
-
-  <Link to="/blog" className="hover:text-foreground">
-    Blog
-  </Link>
-
-  <Link to="/about" className="hover:text-foreground">
-    About
-  </Link>
-
-  <Link to="/contact" className="hover:text-foreground">
-    Contact
-  </Link>
-
-  <Link to="/privacy" className="hover:text-foreground">
-    Privacy Policy
-  </Link>
-
-  <Link to="/terms" className="hover:text-foreground">
-    Terms
-  </Link>
-
-  <a href="#faq" className="hover:text-foreground">
-    FAQ
-  </a>
-</nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
