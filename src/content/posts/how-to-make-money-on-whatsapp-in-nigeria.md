@@ -18,6 +18,8 @@ Search for "how to make money on WhatsApp" and you will find a lot of hype. The 
 2. **A way to reach buyers.** Your saved-contact list, Status and referrals. See how to [build your WhatsApp network](/blog/grow-small-business-whatsapp-network-nigeria).
 3. **Trust.** Clear prices, proof, safe payments and prompt replies.
 
+![Illustration for the section: 12 ways to earn using WhatsApp](/blog/how-to-make-money-on-whatsapp-in-nigeria-2.jpg)
+
 ## 12 ways to earn using WhatsApp
 
 ### 1. Sell products you make
@@ -125,6 +127,8 @@ It depends on your product, your network and how consistently you show up. Some 
 ### Do I need to register my business?
 
 You can start informally, but registration helps with trust, bank accounts and bigger customers as you grow. Our [CAC registration guide](/blog/register-business-name-nigeria-cac-guide) explains the process in simple steps.
+
+![Illustration for the section: Avoid scams and "get rich quick" traps](/blog/how-to-make-money-on-whatsapp-in-nigeria-3.jpg)
 
 ## Avoid scams and "get rich quick" traps
 

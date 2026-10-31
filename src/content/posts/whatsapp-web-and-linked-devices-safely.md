@@ -32,6 +32,8 @@ WhatsApp now supports linking more than one device at a time, up to a limit set 
 
 Linked devices may disconnect if you do not use your phone for a long period, so open WhatsApp on the phone from time to time.
 
+![Illustration for the section: The real risks](/blog/whatsapp-web-and-linked-devices-safely-2.jpg)
+
 ## The real risks
 
 ### 1. Shared and public computers
@@ -97,6 +99,8 @@ Many Nigerian businesses let more than one person answer customers. A shop owner
 - **Consider whether the WhatsApp Business app suits you.** Its features differ from the regular app, as explained in [WhatsApp Business vs WhatsApp Messenger](/blog/whatsapp-business-vs-whatsapp-messenger).
 
 Larger companies with many agents may use the WhatsApp Business Platform through an approved provider. You can read the overview on the [WhatsApp Business website](https://www.whatsapp.com/business/).
+
+![Illustration for the section: Common mistakes to avoid](/blog/whatsapp-web-and-linked-devices-safely-3.jpg)
 
 ## Common mistakes to avoid
 

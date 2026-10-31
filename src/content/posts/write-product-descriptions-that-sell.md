@@ -20,6 +20,8 @@ A buyer scrolling quickly has little else to judge by. A photo catches attention
 - **It filters buyers.** When price, size and location are clear, the people who message are more likely to buy.
 - **It builds trust.** Specific details feel honest. Vague claims feel risky. Our article on [building customer trust when selling online in Nigeria](/blog/build-customer-trust-online-nigeria) explains why.
 
+![Illustration for the section: The structure of a good listing](/blog/write-product-descriptions-that-sell-2.jpg)
+
 ## The structure of a good listing
 
 Whatever platform you use, this order works.
@@ -119,6 +121,8 @@ Marketplaces and Instagram search reward clear, relevant words. You do not need 
 - **Mention the use.** "Office wear," "school bag," "wedding guest outfit" or "gift for her" match how people shop.
 
 Do not stuff a title with a long list of keywords. It looks like spam and may be penalised or ignored. Write for people first. For tips on getting more eyes on your listings without paying, see [how to get customers without ads in Nigeria](/blog/get-customers-without-ads-nigeria).
+
+![Illustration for the section: Adapting for each platform](/blog/write-product-descriptions-that-sell-3.jpg)
 
 ## Adapting for each platform
 

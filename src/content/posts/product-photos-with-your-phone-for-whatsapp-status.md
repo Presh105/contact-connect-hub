@@ -14,6 +14,8 @@ You do not need a studio or an expensive camera to make a product look good on W
 
 On Status, a customer gives you about two seconds. If the photo is dark, blurry or cluttered, they move on. If it is bright and clear, they pause. Better images also reduce questions like "Is this the real colour?" and "What does the back look like?", which saves you time. Pair good visuals with the caption tips in our guide to [WhatsApp Status content ideas for vendors](/blog/whatsapp-status-content-ideas-for-vendors).
 
+![Illustration for the section: Lighting: the biggest upgrade](/blog/product-photos-with-your-phone-for-whatsapp-status-2.jpg)
+
 ## Lighting: the biggest upgrade
 
 ### Use daylight
@@ -72,6 +74,8 @@ Never use someone else's photos for your products. Customers notice, and it can 
 ## Build a repeatable shooting session
 
 Pick one hour a week. Set up near a window, prepare your background, shoot your top products from three angles, record two or three short clips and edit them in a batch. Save them in a folder and post across the week using the schedule from our guide to the [best time to post WhatsApp Status in Nigeria](/blog/best-time-to-post-whatsapp-status-nigeria).
+
+![Illustration for the section: Photo ideas for common product types](/blog/product-photos-with-your-phone-for-whatsapp-status-3.jpg)
 
 ## Photo ideas for common product types
 

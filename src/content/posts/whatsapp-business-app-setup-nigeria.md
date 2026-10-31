@@ -22,6 +22,8 @@ The two apps look similar, but the Business app adds tools for selling:
 
 A separate paid product, the WhatsApp Business Platform (API), is for larger companies that want automation through a provider. Most small Nigerian businesses only need the free app. You can read the official overview on the [WhatsApp Business website](https://www.whatsapp.com/business/).
 
+![Illustration for the section: Before you start: choose your number](/blog/whatsapp-business-app-setup-nigeria-2.jpg)
+
 ## Before you start: choose your number
 
 You can run the Business app with the number you already use, or with a new SIM. Keep these points in mind:
@@ -78,6 +80,8 @@ Each tool has a different job.
 - **Groups** let people talk to each other. Best for communities and clubs. Do not add people without their consent.
 
 Use Status to attract attention, broadcast lists to nudge existing customers and groups only where a real community exists.
+
+![Illustration for the section: Step 6: Protect your account](/blog/whatsapp-business-app-setup-nigeria-3.jpg)
 
 ## Step 6: Protect your account
 

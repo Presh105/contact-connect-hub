@@ -16,6 +16,8 @@ Unlike Instagram or Facebook, WhatsApp has no public search where strangers disc
 
 Quality matters as much as quantity. Fifty saved contacts who regularly buy are worth more than a thousand who never open your updates.
 
+![Illustration for the section: Who belongs in a business network](/blog/grow-small-business-whatsapp-network-nigeria-2.jpg)
+
 ## Who belongs in a business network
 
 - **Existing and past customers.** The easiest and warmest group.
@@ -76,6 +78,8 @@ Whichever promise you make, deliver it consistently. If you promise Friday offer
 ## A simple example: a phone accessories seller
 
 Consider a seller in Aba who stocks phone cases and chargers. She prints her number and the line "Save this number for daily deals" on her packaging, then asks each buyer to send "saved." She partners with a repair shop that recommends her to customers, while she recommends the shop in return. She also posts a quick tip each morning, such as how to avoid overnight charging habits that damage batteries. Within a couple of months she has more saved contacts, more enquiries and more repeat buyers, and she did it without paid ads. The effort was steady and personal rather than clever.
+
+![Illustration for the section: Mistakes with referrals and exchanges](/blog/grow-small-business-whatsapp-network-nigeria-3.jpg)
 
 ## Mistakes with referrals and exchanges
 

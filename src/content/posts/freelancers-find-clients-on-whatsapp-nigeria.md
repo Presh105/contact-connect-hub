@@ -28,6 +28,8 @@ Create a short portfolio in a PDF, a free website, Behance, GitHub or a Google D
 
 Ask past clients for short testimonials and permission to show their work. Screenshots of kind messages, with names or numbers hidden if needed, help new clients trust you.
 
+![Illustration for the section: Step 2: Use Status to show your work](/blog/freelancers-find-clients-on-whatsapp-nigeria-2.jpg)
+
 ## Step 2: Use Status to show your work
 
 Your Status is a free daily showcase for everyone who has saved your number.
@@ -100,6 +102,8 @@ Poor agreements cause most freelance problems. Before you start:
 - Keep client chats organised with labels such as Lead, Active, Waiting for feedback and Paid.
 - Use voice notes only if the client prefers them; written summaries are easier to refer to later.
 - Be honest about delays and limits.
+
+![Illustration for the section: Step 7: Keep clients and get referrals](/blog/freelancers-find-clients-on-whatsapp-nigeria-3.jpg)
 
 ## Step 7: Keep clients and get referrals
 

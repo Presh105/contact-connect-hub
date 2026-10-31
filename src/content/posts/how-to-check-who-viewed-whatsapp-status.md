@@ -16,6 +16,8 @@ On Android, open the Updates tab, tap **My status**, then swipe up on the update
 
 If you have several updates, the list is shown per update, so open each one separately. You can also tap a viewer's name to message them directly, which is a quick way to follow up.
 
+![Illustration for the section: Why the viewer list can be empty or incomplete](/blog/how-to-check-who-viewed-whatsapp-status-2.jpg)
+
 ## Why the viewer list can be empty or incomplete
 
 ### Read receipts are switched off
@@ -70,6 +72,8 @@ Each evening, write down the number of posts, total views and the number of mess
 ## Be respectful with what you learn
 
 Viewer data is for improving your service, not for chasing people. Do not message every viewer at once with the same sales text, and do not add people to groups without asking. Not only is it irritating, it can trigger reports and restrictions. See [what is allowed on WhatsApp marketing](/blog/whatsapp-marketing-rules-what-is-allowed).
+
+![Illustration for the section: Following up with viewers the right way](/blog/how-to-check-who-viewed-whatsapp-status-3.jpg)
 
 ## Following up with viewers the right way
 

@@ -16,6 +16,8 @@ WhatsApp is the most important sales channel for many Nigerian businesses, and i
 
 WhatsApp is built for personal conversations. Its commercial rules revolve around two ideas. First, people should receive messages only if they expect them. Second, those messages should be relevant and wanted. If recipients block you, report you or ignore your messages in large numbers, WhatsApp's systems treat your account as a source of unwanted messages.
 
+![Illustration for the section: Behaviours that commonly lead to restrictions or bans](/blog/whatsapp-marketing-rules-what-is-allowed-2.jpg)
+
 ## Behaviours that commonly lead to restrictions or bans
 
 - **Mass messaging people who do not know you.** Sending the same message to hundreds of strangers is the fastest route to a ban.
@@ -75,6 +77,8 @@ Rules are easier to remember with examples.
 - **Safer:** Posting a group invitation link on Status and in the bio, so only interested people choose to join. See our comparison of [WhatsApp groups and communities](/blog/whatsapp-groups-vs-communities-which-to-use).
 - **Unsafe:** Using a third-party app that sends messages automatically from your number.
 - **Safer:** Using the official Business app's quick replies and labels, or a [WhatsApp Channel](/blog/how-to-create-whatsapp-channel-nigeria) for one-way updates to followers who chose to subscribe.
+
+![Illustration for the section: Protect your reputation as well as your account](/blog/whatsapp-marketing-rules-what-is-allowed-3.jpg)
 
 ## Protect your reputation as well as your account
 

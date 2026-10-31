@@ -20,6 +20,8 @@ This guide compares WhatsApp Status, Instagram and TikTok in practical terms: wh
 
 None of them is always better. The right choice depends on your product, your customers and the time you have.
 
+![Illustration for the section: WhatsApp Status: your warm audience](/blog/whatsapp-vs-instagram-vs-tiktok-for-nigerian-sellers-2.jpg)
+
 ## WhatsApp Status: your warm audience
 
 Status posts disappear after 24 hours and are seen mainly by contacts who have your number saved and who have not hidden your updates. That sounds limiting, but it is also the strength. These are people who already have some connection to you, so a Status post often feels like a message from someone they know.
@@ -102,6 +104,8 @@ These are general patterns, not rules.
 - **Digital products or training:** TikTok for reach, Instagram for credibility, WhatsApp for sales and support.
 
 If you are still choosing what to sell, read about how to [start a small business in Nigeria with low capital](/blog/start-small-business-nigeria-low-capital).
+
+![Illustration for the section: How to combine them without burning out](/blog/whatsapp-vs-instagram-vs-tiktok-for-nigerian-sellers-3.jpg)
 
 ## How to combine them without burning out
 

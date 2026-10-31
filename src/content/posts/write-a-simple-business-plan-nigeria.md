@@ -22,6 +22,8 @@ A plan does three practical things.
 
 You do not need special software. A notebook, a phone notes app or a simple spreadsheet is enough. If you are still deciding what business to start, read our guide to [starting a small business in Nigeria with low capital](/blog/start-small-business-nigeria-low-capital) first and then come back here.
 
+![Illustration for the section: The sections your plan needs](/blog/write-a-simple-business-plan-nigeria-2.jpg)
+
 ## The sections your plan needs
 
 Think of the plan as a template with seven short parts. Each part can be a few lines.
@@ -120,6 +122,8 @@ Here is how to prepare:
 - **Avoid anyone who asks you to pay a "processing fee" for a guaranteed grant.** That is a common trick. Our guide to [spotting WhatsApp scams in Nigeria](/blog/spot-whatsapp-scams-nigeria) explains the warning signs.
 
 Rules, fees and programmes change from time to time, so always check with the official source before you apply.
+
+![Illustration for the section: A one-page template you can copy](/blog/write-a-simple-business-plan-nigeria-3.jpg)
 
 ## A one-page template you can copy
 

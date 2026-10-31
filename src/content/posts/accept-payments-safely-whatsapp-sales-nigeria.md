@@ -28,6 +28,8 @@ The buyer pays when they receive the item. It reduces trust problems for new cus
 
 For custom or expensive items, take a deposit, such as half, before starting work, and the balance before delivery. Write down what the deposit covers.
 
+![Illustration for the section: Fake alerts and how to avoid them](/blog/accept-payments-safely-whatsapp-sales-nigeria-2.jpg)
+
 ## Fake alerts and how to avoid them
 
 Fake payment alerts are the number one scam against WhatsApp sellers. Common tricks include:
@@ -84,6 +86,8 @@ Create a basic sheet or notebook with columns for date, customer, item, amount, 
 ## Handle disputes calmly
 
 If a buyer claims they paid and did not receive goods, check your records and the bank statement. If the payment is genuine, apologise, fix the issue and offer a clear timeline. If the buyer says they will report you, remain polite and stay factual. For fake claims, avoid arguments and share your evidence. Our guide on [handling complaints](/blog/whatsapp-business-catalog-guide) covers a five-step process.
+
+![Illustration for the section: Common payment mistakes sellers make](/blog/accept-payments-safely-whatsapp-sales-nigeria-3.jpg)
 
 ## Common payment mistakes sellers make
 

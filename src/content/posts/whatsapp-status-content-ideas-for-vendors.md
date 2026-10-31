@@ -14,6 +14,8 @@ Running out of things to post is the number one reason small businesses fall sil
 
 Across a week, aim for roughly this balance: 40 percent product and offers, 25 percent proof, 20 percent helpful content and 15 percent personality. It keeps your Status interesting and builds trust, which is what turns viewers into buyers. For timing, see our [posting schedule for Nigeria](/blog/best-time-to-post-whatsapp-status-nigeria).
 
+![Illustration for the section: Product and offer ideas](/blog/whatsapp-status-content-ideas-for-vendors-2.jpg)
+
 ## Product and offer ideas
 
 1. **Hero product of the day.** One clear photo, price, size or colour options and how to order.
@@ -86,6 +88,8 @@ Across a week, aim for roughly this balance: 40 percent product and offers, 25 p
 - **Keep it short.** Two or three lines for most posts.
 - **Use plain language.** Write the way you would explain it to a friend.
 - **Avoid fake urgency.** If "only 3 left" is not true, customers will notice and trust you less.
+
+![Illustration for the section: Plan a week in thirty minutes](/blog/whatsapp-status-content-ideas-for-vendors-3.jpg)
 
 ## Plan a week in thirty minutes
 

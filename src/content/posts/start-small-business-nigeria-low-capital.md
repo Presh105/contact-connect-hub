@@ -25,6 +25,8 @@ Ask yourself these questions:
 
 Avoid copying something only because it looks profitable on social media. If ten people on your street already sell the same thing, you need a clear reason why customers would choose you, such as better quality, better delivery or better service.
 
+![Illustration for the section: Step 2: Check demand before you spend](/blog/start-small-business-nigeria-low-capital-2.jpg)
+
 ## Step 2: Check demand before you spend
 
 Validation means finding proof that people will pay before you invest heavily. It costs very little and can save you from a bad decision.
@@ -103,6 +105,8 @@ For a new business, trust is capital. Customers who have never heard of you need
 - Share feedback from satisfied customers, with their permission.
 
 More ideas are in [how to build customer trust online in Nigeria](/blog/build-customer-trust-online-nigeria).
+
+![Illustration for the section: Low-capital business ideas, with realistic notes](/blog/start-small-business-nigeria-low-capital-3.jpg)
 
 ## Low-capital business ideas, with realistic notes
 

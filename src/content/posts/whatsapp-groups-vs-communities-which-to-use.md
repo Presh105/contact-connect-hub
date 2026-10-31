@@ -26,6 +26,8 @@ Before you create anything, understand what each tool is for.
 
 A simple rule helps: if you want people to talk to each other, use a group. If you want to organise many groups, use a Community. If you want to speak and people mostly listen, use a broadcast list, Status or a channel.
 
+![Illustration for the section: When a group is the right choice](/blog/whatsapp-groups-vs-communities-which-to-use-2.jpg)
+
 ## When a group is the right choice
 
 A normal group works best when the number of members is manageable and everyone has a reason to speak. Examples include:
@@ -101,6 +103,8 @@ A better approach is to:
 4. Let anyone leave freely without making them feel guilty.
 
 This is both courteous and sensible. Phone numbers are personal data, and handling them carefully matters. Our guide on the [Nigeria Data Protection Act and WhatsApp contacts](/blog/nigeria-data-protection-act-whatsapp-contacts) explains the thinking behind this, and you can read more on the [Nigeria Data Protection Commission website](https://ndpc.gov.ng/). For what is and is not acceptable when messaging customers, see [WhatsApp marketing rules: what is allowed](/blog/whatsapp-marketing-rules-what-is-allowed).
+
+![Illustration for the section: Moderation and admin tips](/blog/whatsapp-groups-vs-communities-which-to-use-3.jpg)
 
 ## Moderation and admin tips
 

@@ -21,6 +21,8 @@ When you notice something is missing, do not rush. A few quick checks may solve 
 - **Search for the contact or a keyword** using the search bar. The chat may simply have scrolled out of view.
 - **Check whether you cleared the chat or deleted it.** Clearing removes messages but leaves the chat open, while deleting removes the chat from your list. Both can be restored from a backup in similar ways.
 
+![Illustration for the section: What "delete for me" and "delete for everyone" mean](/blog/recover-deleted-whatsapp-messages-2.jpg)
+
 ## What "delete for me" and "delete for everyone" mean
 
 Understanding these two options explains most recovery questions.
@@ -86,6 +88,8 @@ Two things might already hold copies of your content without you remembering.
 
 - **Exported chats.** WhatsApp has an option to export a chat as a file, usually from the chat's menu with or without media. If you ever exported or emailed a chat to yourself, search your email and files.
 - **Saved photos and videos.** If your phone saves received media to the gallery, deleted chat messages may not have deleted the pictures. Check your gallery or file manager. Our guide on [saving WhatsApp Status photos and videos](/blog/how-to-save-whatsapp-status-photos-and-videos) covers related tips.
+
+![Illustration for the section: What is generally not possible](/blog/recover-deleted-whatsapp-messages-3.jpg)
 
 ## What is generally not possible
 

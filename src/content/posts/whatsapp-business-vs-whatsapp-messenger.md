@@ -16,6 +16,8 @@ WhatsApp Messenger is for everyday personal conversations. The WhatsApp Business
 
 If you only chat with friends, stay with Messenger. If customers message you for prices, orders, bookings or delivery, the Business app will almost certainly save you time.
 
+![Illustration for the section: What WhatsApp Business adds](/blog/whatsapp-business-vs-whatsapp-messenger-2.jpg)
+
 ## What WhatsApp Business adds
 
 Here are the main features that regular WhatsApp does not have, or does not have in the same way. App versions change, and features vary by country, so check what you see on your own phone.
@@ -97,6 +99,8 @@ If your customers already know your current number, moving it keeps them connect
 For a full walk-through with screenshots of each section, read our [WhatsApp Business app setup guide for Nigeria](/blog/whatsapp-business-app-setup-nigeria). If you later change phones, see how to [move WhatsApp chats to a new phone](/blog/move-whatsapp-chats-to-new-phone).
 
 A warning: once your number is on the Business app, going back to regular WhatsApp can mean losing some Business-specific data such as your catalogue and labels. Ask yourself whether you are sure before you start.
+
+![Illustration for the section: The Business app and the API: a quick overview](/blog/whatsapp-business-vs-whatsapp-messenger-3.jpg)
 
 ## The Business app and the API: a quick overview
 

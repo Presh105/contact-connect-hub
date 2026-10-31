@@ -25,6 +25,8 @@ That backup normally lives in one of two places:
 
 There is also a local backup file that many Android phones keep in storage, which can help in some cases. Cloud backups are the safer route because they survive a lost or broken phone.
 
+![Illustration for the section: Before you switch: the preparation checklist](/blog/move-whatsapp-chats-to-new-phone-2.jpg)
+
 ## Before you switch: the preparation checklist
 
 Spend ten minutes on this, and most problems disappear.
@@ -96,6 +98,8 @@ The process is similar, but there are extra things to protect:
 - **Restore two-step verification.** If you use it, you will need your PIN. Our guide on [two-step verification for a WhatsApp Business number](/blog/two-step-verification-whatsapp-business-number) explains how to set one up and what to do if you forget it.
 
 If you are still deciding which app suits you, see [WhatsApp Business vs WhatsApp Messenger](/blog/whatsapp-business-vs-whatsapp-messenger). To set things up from scratch on the new phone, follow [our WhatsApp Business setup guide](/blog/whatsapp-business-app-setup-nigeria).
+
+![Illustration for the section: If your old phone is lost, stolen or dead](/blog/move-whatsapp-chats-to-new-phone-3.jpg)
 
 ## If your old phone is lost, stolen or dead
 

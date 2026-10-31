@@ -18,6 +18,8 @@ WhatsApp is where Nigerians chat, shop and do business, so it is also where scam
 
 **Protect yourself:** Never share your code with anyone, for any reason. Turn on two-step verification. See [how to protect your WhatsApp number](/blog/two-step-verification-whatsapp-business-number).
 
+![Illustration for the section: 2. The hijacked friend or relative](/blog/spot-whatsapp-scams-nigeria-2.jpg)
+
 ## 2. The hijacked friend or relative
 
 **How it works:** You get a message from a friend's account asking for money, airtime or data because of an emergency. The account is controlled by a scammer.
@@ -81,6 +83,8 @@ WhatsApp is where Nigerians chat, shop and do business, so it is also where scam
 **Warning signs:** Prices far below the market, stock photos from other sellers, no physical address and refusal to meet in person or pay on delivery.
 
 **Protect yourself:** Search the seller's name and number, ask for a video of the item, prefer pay-on-delivery for small purchases and meet in public places for big ones.
+
+![Illustration for the section: 10. Romance and blackmail scams](/blog/spot-whatsapp-scams-nigeria-3.jpg)
 
 ## 10. Romance and blackmail scams
 

@@ -19,6 +19,8 @@ Most WhatsApp takeovers do not involve hacking in the movie sense. They rely on 
 - **Unlocked phone.** Someone with access to your phone can use WhatsApp Web or link a device.
 - **Malicious apps and fake WhatsApp versions.** Unofficial apps can steal data.
 
+![Illustration for the section: Step 1: Turn on two-step verification](/blog/two-step-verification-whatsapp-business-number-2.jpg)
+
 ## Step 1: Turn on two-step verification
 
 Two-step verification adds a six-digit PIN that is required whenever someone registers your number on a new phone. Even if a scammer gets your SMS code, they cannot finish registration without the PIN.
@@ -82,6 +84,8 @@ Act quickly.
 ## If your SIM is lost, stolen or swapped
 
 Contact your network provider at once to block the SIM and get a replacement with the same number. Then re-register WhatsApp on the new SIM. Tell your bank if your number is linked to banking alerts or apps.
+
+![Illustration for the section: For businesses with several staff](/blog/two-step-verification-whatsapp-business-number-3.jpg)
 
 ## For businesses with several staff
 

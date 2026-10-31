@@ -16,6 +16,8 @@ There is no single magic hour for WhatsApp Status. Your best time depends on who
 
 Status updates last 24 hours, but attention does not. Most people open the Status tab in short bursts, watch the first few updates in the list and leave. WhatsApp orders the list by recency and by who you have been talking to, so posting just before people open the app helps you appear near the top. Posting when your audience is busy or asleep means your update sits unseen.
 
+![Illustration for the section: A starting schedule for Nigerian audiences](/blog/best-time-to-post-whatsapp-status-nigeria-2.jpg)
+
 ## A starting schedule for Nigerian audiences
 
 ### Early morning, about 6:30 to 8:30am
@@ -72,6 +74,8 @@ After a month you will have real data about your own audience, which is worth mo
 - Posting only at night because that is when you are free. Use a phone reminder or schedule time in your day.
 - Ignoring your time zone. If you sell to Nigerians abroad, check their local time, because 8pm in Lagos is mid-afternoon in some places.
 - Changing too many things at once, so you cannot tell what worked.
+
+![Illustration for the section: Worked example: a small bakery testing its slots](/blog/best-time-to-post-whatsapp-status-nigeria-3.jpg)
 
 ## Worked example: a small bakery testing its slots
 

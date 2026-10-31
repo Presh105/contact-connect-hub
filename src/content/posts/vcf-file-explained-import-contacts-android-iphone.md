@@ -16,6 +16,8 @@ VCF stands for **Virtual Contact File**, also called a **vCard**. It is a plain-
 
 A basic entry looks like this: a name, a phone number and a few formatting lines. You can open a VCF file in a text editor to see this, but you normally just import it into your phone.
 
+![Illustration for the section: Why people use VCF files](/blog/vcf-file-explained-import-contacts-android-iphone-2.jpg)
+
 ## Why people use VCF files
 
 - **Moving to a new phone** without relying on a SIM card.
@@ -77,6 +79,8 @@ Modern phones can store thousands of contacts. The real limit is usually the acc
 - **Add the country code.** Numbers saved as +234 work better with WhatsApp than numbers starting with 0.
 - **Label imported groups.** Create a label or group such as "Status Connect 2026" so you can find or delete the batch later.
 - **Respect privacy.** Only share and store contacts with permission. See our guide on [data protection and WhatsApp contacts](/blog/nigeria-data-protection-act-whatsapp-contacts).
+
+![Illustration for the section: Why imported numbers do not show in WhatsApp](/blog/vcf-file-explained-import-contacts-android-iphone-3.jpg)
 
 ## Why imported numbers do not show in WhatsApp
 

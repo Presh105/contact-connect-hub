@@ -18,6 +18,8 @@ When a customer messages you, they are asking two questions at the same time: "I
 
 Trust matters even more for small sellers because buyers cannot touch the item, cannot inspect it before paying, and often cannot visit you. Every part of your presence online either lowers that worry or raises it. The good news is that most trust-building is free. It takes consistency, not a big budget.
 
+![Illustration for the section: Make it obvious that a real person is behind the business](/blog/build-customer-trust-online-nigeria-2.jpg)
+
 ## Make it obvious that a real person is behind the business
 
 Anonymous accounts are easy to abandon, and buyers know it. Give people reasons to believe you are accountable.
@@ -104,6 +106,8 @@ Consistency is quiet proof. A seller who looks the same everywhere feels establi
 - Reply **in a predictable window.** If you only answer in the evening, say so in your profile or away message.
 - Keep your **number stable.** Changing numbers often makes customers think you disappeared. Protect it with [two-step verification](/blog/two-step-verification-whatsapp-business-number).
 - Fix **spelling and price errors** quickly and admit mistakes when they happen.
+
+![Illustration for the section: Message examples you can adapt](/blog/build-customer-trust-online-nigeria-3.jpg)
 
 ## Message examples you can adapt
 

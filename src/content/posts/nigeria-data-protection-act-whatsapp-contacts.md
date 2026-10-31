@@ -16,6 +16,8 @@ If you run a business on WhatsApp, you hold personal data every day: names, phon
 
 The **Nigeria Data Protection Act 2023 (NDPA)** is the main law governing how personal data is collected, used, stored and shared in Nigeria. It also established the **Nigeria Data Protection Commission (NDPC)**, the regulator that oversees compliance. The law applies to organisations that process personal data, which can include small and informal businesses as well as large companies, depending on what they do and how much data they handle.
 
+![Illustration for the section: What counts as personal data?](/blog/nigeria-data-protection-act-whatsapp-contacts-2.jpg)
+
 ## What counts as personal data?
 
 Personal data is any information that can identify a person, directly or indirectly. In a WhatsApp business, that includes:
@@ -84,6 +86,8 @@ If employees access your WhatsApp Business account, limit access and remove it w
 8. **Know who is responsible.** In a small business, that might be you. Larger operations may need a designated person.
 9. **Plan for incidents.** If an account is hijacked or data is leaked, act quickly to contain it, inform affected people where appropriate and follow guidance from the regulator.
 10. **Check registration duties.** Depending on the volume and nature of data you process, there may be registration or reporting requirements. Check with the NDPC or a lawyer.
+
+![Illustration for the section: Everyday scenarios and what to do](/blog/nigeria-data-protection-act-whatsapp-contacts-3.jpg)
 
 ## Everyday scenarios and what to do
 

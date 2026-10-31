@@ -32,6 +32,8 @@ Open the Business app, go to Settings, Business tools, Catalogue and tap Add new
 - **Share it.** Send the catalogue link in Status, Instagram bio and on printed materials.
 - **Check prices often.** Nigerian prices move quickly. An outdated price can cause awkward disputes.
 
+![Illustration for the section: Part 2: Quick replies that save hours](/blog/whatsapp-business-catalog-guide-2.jpg)
+
 ## Part 2: Quick replies that save hours
 
 A quick reply is a saved message you can insert by typing a slash and a shortcut. Set them up in Settings, Business tools, Quick replies.
@@ -90,6 +92,8 @@ For more on this skill, read [how to write product descriptions that sell](/blog
 ## A simple weekly catalogue routine
 
 Pick one day each week for maintenance. Remove sold-out products, check that every price still matches your records, replace weak photos with better ones and add any new arrivals. Then reread your quick replies and fix anything out of date, such as delivery fees or bank details. Finally, scan your labelled chats and send a polite nudge to anyone waiting too long. Fifteen minutes of regular upkeep prevents most of the awkward situations that come from outdated information, and it keeps your business looking active and trustworthy.
+
+![Illustration for the section: Quick replies that go wrong](/blog/whatsapp-business-catalog-guide-3.jpg)
 
 ## Quick replies that go wrong
 

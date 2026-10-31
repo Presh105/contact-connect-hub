@@ -20,6 +20,8 @@ It is a normal web link that starts a WhatsApp conversation with a specific phon
 
 It works with the regular app and the WhatsApp Business app. If you have not set up the Business app yet, start with our [WhatsApp Business setup guide](/blog/whatsapp-business-app-setup-nigeria).
 
+![Illustration for the section: The link format](/blog/whatsapp-click-to-chat-link-and-qr-code-2.jpg)
+
 ## The link format
 
 The basic format is:
@@ -106,6 +108,8 @@ WhatsApp does not give you a detailed marketing dashboard for a basic link, but 
 5. **Review monthly.** Keep what brings buyers, and drop placements that bring only time-wasters.
 
 Link shortening or tracking tools exist, but only use well-known services, and check that they do not break the link. Be cautious, because some short links hide where they go and customers may not trust them.
+
+![Illustration for the section: Common mistakes to avoid](/blog/whatsapp-click-to-chat-link-and-qr-code-3.jpg)
 
 ## Common mistakes to avoid
 

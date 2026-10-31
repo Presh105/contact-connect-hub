@@ -22,6 +22,8 @@ Before you try to reach strangers, look at who is already close to your business
 
 The first ten customers usually come from this circle, so give it real effort.
 
+![Illustration for the section: Build a simple referral habit](/blog/get-customers-without-ads-nigeria-2.jpg)
+
 ## Build a simple referral habit
 
 Referrals work because people trust people they know. You do not need a complicated system.
@@ -98,6 +100,8 @@ New customers often ask, "Is this person real?" Proof answers that question.
 - Share how you handled a complaint. A calm, fair response can build more confidence than a perfect record.
 
 More ideas are in our guide on [building customer trust online in Nigeria](/blog/build-customer-trust-online-nigeria).
+
+![Illustration for the section: Follow up without being annoying](/blog/get-customers-without-ads-nigeria-3.jpg)
 
 ## Follow up without being annoying
 

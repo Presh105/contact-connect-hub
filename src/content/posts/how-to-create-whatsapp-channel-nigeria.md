@@ -24,6 +24,8 @@ Think of it as a noticeboard that people choose to follow, or a small radio stat
 
 Features, limits and availability can change, so check what you see on your phone and read the official pages on the [WhatsApp Help Centre](https://faq.whatsapp.com/).
 
+![Illustration for the section: Channels vs groups vs Status vs broadcast lists](/blog/how-to-create-whatsapp-channel-nigeria-2.jpg)
+
 ## Channels vs groups vs Status vs broadcast lists
 
 Many people confuse these, so here is the difference in plain words.
@@ -91,6 +93,8 @@ Occasionally say, "If this helped you, forward it to a friend who needs it." Do 
 ### Consider the directory
 
 WhatsApp has a Channel directory where people can find Channels. Whether and how your Channel appears depends on current settings and rules, so check the options in the app.
+
+![Illustration for the section: A simple content plan](/blog/how-to-create-whatsapp-channel-nigeria-3.jpg)
 
 ## A simple content plan
 

@@ -18,6 +18,8 @@ This guide explains the basics in plain English: the difference between a busine
 
 The CAC is the Nigerian government body that registers companies, business names and certain other organisations. When you register, your business gets an official record, and you receive documents that show it exists legally. Registration is separate from other obligations, such as tax and any sector licences your trade may need.
 
+![Illustration for the section: Business name vs limited company](/blog/register-business-name-nigeria-cac-guide-2.jpg)
+
 ## Business name vs limited company
 
 For most small businesses, the choice comes down to two common structures. They are different in important ways, so it helps to understand them before you start.
@@ -88,6 +90,8 @@ Many people prefer to use an accredited agent, a lawyer or a professional servic
 - Get the agreed price and service in writing before you pay.
 - Never hand over your ID and passwords to someone you do not know.
 - Make sure the registration is made in your name or your company's name, and that you receive the documents.
+
+![Illustration for the section: After registration: your next steps](/blog/register-business-name-nigeria-cac-guide-3.jpg)
 
 ## After registration: your next steps
 

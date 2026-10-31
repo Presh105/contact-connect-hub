@@ -28,6 +28,8 @@ Your cost is more than what you paid the supplier. Add everything:
 
 You buy a bag for N8,000 and pay N500 for transport. Packaging is N300, data and chat time about N200 and you set aside N500 for returns and damaged items. Your cost is N9,500, not N8,000.
 
+![Illustration for the section: Step 2: Choose a margin](/blog/how-to-price-products-on-whatsapp-nigeria-2.jpg)
+
 ## Step 2: Choose a margin
 
 **Margin** is the percentage of the selling price that is profit. **Markup** is the percentage added on top of cost. They are not the same, and mixing them up is a common mistake.
@@ -80,6 +82,8 @@ Haggling is part of Nigerian culture, so plan for it.
 ## Step 8: Use promotions wisely
 
 Limited-time discounts can boost sales, but frequent discounts train customers to wait. Use promotions for specific goals: clearing slow stock, launching a product or rewarding loyal customers. Compute your margin at the discounted price first. For content ideas, see [WhatsApp Status posts for vendors](/blog/whatsapp-status-content-ideas-for-vendors).
+
+![Illustration for the section: Step 9: Review monthly](/blog/how-to-price-products-on-whatsapp-nigeria-3.jpg)
 
 ## Step 9: Review monthly
 

@@ -16,6 +16,8 @@ Status is built to be temporary. WhatsApp shows it to the people who have the po
 
 The most important point comes first: a Status belongs to the person who posted it. Saving it for your own reference is one thing. Reposting it, selling with it or sharing it publicly without permission is another.
 
+![Illustration for the section: Saving your own Status photos and videos](/blog/how-to-save-whatsapp-status-photos-and-videos-2.jpg)
+
 ## Saving your own Status photos and videos
 
 This is the easy and fully legitimate case. If you posted it, you are free to keep it.
@@ -85,6 +87,8 @@ Some simple rules:
 - **Do not use saved content to embarrass, threaten or blackmail anyone.** That is harmful and can lead to serious consequences.
 
 Laws and platform policies change, so check the current rules if you plan to reuse content commercially.
+
+![Illustration for the section: Protecting your own Status from being copied](/blog/how-to-save-whatsapp-status-photos-and-videos-3.jpg)
 
 ## Protecting your own Status from being copied
 

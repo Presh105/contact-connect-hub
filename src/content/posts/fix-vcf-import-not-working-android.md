@@ -31,6 +31,8 @@ When you import on Android, you are asked where to save the contacts. If you cho
 
 Update the Contacts and Google apps, restart the phone and try again. Old versions of some phone brands' Contacts apps have bugs with large imports.
 
+![Illustration for the section: Problem 2: Imported contacts are not showing in WhatsApp](/blog/fix-vcf-import-not-working-android-2.jpg)
+
 ## Problem 2: Imported contacts are not showing in WhatsApp
 
 This is the most common complaint. Work through the steps in order.
@@ -119,6 +121,8 @@ Use the Undo changes option in Google Contacts if you act within thirty days, or
 ### Do I need internet to import a VCF file?
 
 Importing into the phone itself works offline, but syncing to Google or iCloud and WhatsApp's refresh need a connection. If contacts do not appear, check your data or Wi-Fi first.
+
+![Illustration for the section: Back up before every big import](/blog/fix-vcf-import-not-working-android-3.jpg)
 
 ## Back up before every big import
 

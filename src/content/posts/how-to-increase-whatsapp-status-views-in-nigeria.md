@@ -18,6 +18,8 @@ That single rule explains most of the gap between low and high view counts. Your
 
 > Quick check: ask five recent customers, "Did my Status show up on your phone today?" If two or three say no, your saved-contact count is the problem, not your content.
 
+![Illustration for the section: Step 1: Count your real audience](/blog/how-to-increase-whatsapp-status-views-in-nigeria-2.jpg)
+
 ## Step 1: Count your real audience
 
 Open your phone contacts and count how many people you have saved. Then think about how many of them you would honestly expect to buy from you. Most vendors find that a large share of their saved contacts are family, old schoolmates and one-time delivery riders. That is fine, but it shows why growth has to start with the **people who have you saved**, not the number of posts you make.
@@ -63,6 +65,8 @@ If you run the WhatsApp Business app, add your catalogue and quick replies so yo
 ## Step 6: Check your privacy settings
 
 Open WhatsApp, go to Settings, Privacy, Status and confirm that "My contacts" is selected. A forgotten "My contacts except" list can quietly hide your posts from hundreds of customers. Also turn read receipts on if you want to see who viewed. We cover this in detail in [how to check who viewed your WhatsApp Status](/blog/how-to-check-who-viewed-whatsapp-status).
+
+![Illustration for the section: Mistakes that kill reach](/blog/how-to-increase-whatsapp-status-views-in-nigeria-3.jpg)
 
 ## Mistakes that kill reach
 
