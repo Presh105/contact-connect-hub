@@ -5,7 +5,8 @@ import{useAuth}from"@/lib/auth-context";
 import{Button}from"@/components/ui/button";
 import{RefreshCcw,History,Bell,Crown,ShieldCheck,Copy,CheckCircle,ChevronDown,Clock}from"lucide-react";
 import{toast}from"sonner";
-import{generateVcf,generateNamedVcf,downloadVcf}from"@/lib/vcf";
+import{generateVcf,generateNamedVcf}from"@/lib/vcf";
+import{DownloadHelp,downloadVcfAndHelp}from"@/components/download-help";
 import{ShareGateDialog}from"@/components/share-gate-dialog";
 import{ShareBanner}from"@/components/share-banner";
 import{gateActive,useShareSettings}from"@/lib/share-gate";
@@ -211,7 +212,7 @@ function Dashboard(){
     return;
    }
 
-   downloadVcf(
+   downloadVcfAndHelp(
     `status-connect-${c.length}.vcf`,
     generateVcf(c)
    );
@@ -240,7 +241,7 @@ function Dashboard(){
     return;
    }
 
-   downloadVcf(
+   downloadVcfAndHelp(
     `status-connect-network-${c.length}.vcf`,
     generateNamedVcf(c.map(x=>({
      name:`Status Connect ${x.user_code}`,
@@ -309,6 +310,7 @@ function Dashboard(){
 
  return(
   <div className="space-y-6">
+   <DownloadHelp/>
 
    <header>
     <p className="text-sm text-muted-foreground">Welcome back</p>

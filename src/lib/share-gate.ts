@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SITE } from "@/lib/site";
 
 export type ShareSettings = {
   enabled: boolean;
@@ -27,6 +28,13 @@ const DEFAULTS: ShareSettings = {
     "Quick favour 🤝 Status Connect only works because members show up for each other. Please share this to your WhatsApp Status before you download. The more of us who share, the more people join, and the more contacts everyone gets to save. Do it honestly, it keeps the community growing for you too.",
 };
 
+/** True when a URL points at a picture/video/file (or storage object) instead of a web page. */
+export const looksLikeFile = (u: string) =>
+  /\.(png|jpe?g|gif|webp|avif|svg|mp4|mov|webm|pdf)(\?|#|$)/i.test(u) || /\/storage\/v1\/object\//i.test(u);
+
+/** The link that goes into the Status must be the website, never a screenshot or file. */
+export const safeLink = (u: string) => (u && looksLikeFile(u) ? SITE.url : u);
+
 export async function fetchShareSettings(): Promise<ShareSettings> {
   const { data } = await supabase
     .from("app_settings")
@@ -36,7 +44,7 @@ export async function fetchShareSettings(): Promise<ShareSettings> {
   const get = (k: string, d: string) => (m.get(k)?.trim() ? (m.get(k) as string) : d);
   return {
     enabled: m.get("share_enabled") === "true",
-    link: (m.get("share_link") || "").trim(),
+    link: safeLink((m.get("share_link") || "").trim()),
     imageUrl: (m.get("share_image_url") || "").trim(),
     message: get("share_message", DEFAULTS.message),
     note: get("share_note", DEFAULTS.note),

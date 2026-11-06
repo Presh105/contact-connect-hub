@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
-import { fetchShareSettings, type ShareSettings } from "@/lib/share-gate";
+import { fetchShareSettings, looksLikeFile, type ShareSettings } from "@/lib/share-gate";
 
 /** Shrinks a phone photo to max 1080px JPEG so uploads stay small. */
 async function compress(file: File): Promise<Blob> {
@@ -56,6 +56,9 @@ export function AdminShareSettings() {
     if (s.enabled && !/^https?:\/\//i.test(s.link)) {
       return toast.error("Link must start with https://");
     }
+    if (looksLikeFile(s.link)) {
+      return toast.error("That link opens a picture or file. Use your website link, e.g. https://statusconnect.com.ng");
+    }
     setBusy(true);
     const rows = [
       { key: "share_enabled", value: String(s.enabled) },
@@ -89,6 +92,9 @@ export function AdminShareSettings() {
       <div className="space-y-1">
         <label className="text-sm font-medium">Link people will share</label>
         <Input placeholder="https://statusconnect.com.ng" value={s.link} onChange={(e) => set({ link: e.target.value })} />
+        <p className="text-xs text-muted-foreground">
+          Must be a web page (your site), not a screenshot or picture link. Upload the picture in the box below instead.
+        </p>
       </div>
 
       <div className="space-y-2">
