@@ -92,6 +92,7 @@ export const Route =
             "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
         },
         { name: "author", content: "Status Connect" },
+        { name: "google-adsense-account", content: "ca-pub-8649380644717070" },
         { property: "og:site_name", content: "Status Connect" },
         { property: "og:type", content: "website" },
         { property: "og:locale", content: "en_NG" },

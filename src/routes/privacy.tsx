@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 
@@ -19,40 +20,7 @@ export const Route = createFileRoute("/privacy")({
 function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/favicon.png"
-              alt="Status Connect logo"
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-md"
-            />
-            <span className="font-semibold text-foreground">
-              Status Connect
-            </span>
-          </Link>
-
-          <nav className="flex items-center gap-2">
-            <Link to="/about">
-              <Button variant="ghost" size="sm">
-                About
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button variant="ghost" size="sm">
-                Contact
-              </Button>
-            </Link>
-            <Link to="/blog">
-              <Button variant="ghost" size="sm">
-                Blog
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto max-w-4xl px-4 py-12 md:py-16">
         <article className="prose prose-slate max-w-none">

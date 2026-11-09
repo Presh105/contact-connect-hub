@@ -19,6 +19,7 @@ export interface BlogPost {
   inlineImage: string;
   author: string;
   wordCount: number;
+  category: string;
 }
 
 /** Retired thin posts → the long guide that now covers the topic (301). */
@@ -36,6 +37,39 @@ export const REDIRECTS: Record<string, string> = {
   "whatsapp-broadcast-list-vs-status-vs-groups": "whatsapp-business-app-setup-nigeria",
   "whatsapp-account-restricted-or-banned-what-to-do": "whatsapp-marketing-rules-what-is-allowed",
   "handle-customer-complaints-on-whatsapp": "whatsapp-business-catalog-guide",
+};
+
+export const CATEGORIES = [
+  "WhatsApp Status",
+  "WhatsApp Business",
+  "Contacts & VCF",
+  "Security & Privacy",
+  "Selling & Money",
+] as const;
+
+const CATEGORY_BY_SLUG: Record<string, (typeof CATEGORIES)[number]> = {
+  "how-to-increase-whatsapp-status-views-in-nigeria": "WhatsApp Status",
+  "how-to-check-who-viewed-whatsapp-status": "WhatsApp Status",
+  "best-time-to-post-whatsapp-status-nigeria": "WhatsApp Status",
+  "whatsapp-status-content-ideas-for-vendors": "WhatsApp Status",
+  "product-photos-with-your-phone-for-whatsapp-status": "WhatsApp Status",
+  "how-to-save-whatsapp-status-photos-and-videos": "WhatsApp Status",
+  "whatsapp-business-app-setup-nigeria": "WhatsApp Business",
+  "whatsapp-business-catalog-guide": "WhatsApp Business",
+  "whatsapp-business-vs-whatsapp-messenger": "WhatsApp Business",
+  "how-to-create-whatsapp-channel-nigeria": "WhatsApp Business",
+  "whatsapp-groups-vs-communities-which-to-use": "WhatsApp Business",
+  "whatsapp-click-to-chat-link-and-qr-code": "WhatsApp Business",
+  "vcf-file-explained-import-contacts-android-iphone": "Contacts & VCF",
+  "fix-vcf-import-not-working-android": "Contacts & VCF",
+  "grow-small-business-whatsapp-network-nigeria": "Contacts & VCF",
+  "move-whatsapp-chats-to-new-phone": "Contacts & VCF",
+  "recover-deleted-whatsapp-messages": "Contacts & VCF",
+  "spot-whatsapp-scams-nigeria": "Security & Privacy",
+  "two-step-verification-whatsapp-business-number": "Security & Privacy",
+  "nigeria-data-protection-act-whatsapp-contacts": "Security & Privacy",
+  "whatsapp-marketing-rules-what-is-allowed": "Security & Privacy",
+  "whatsapp-web-and-linked-devices-safely": "Security & Privacy",
 };
 
 const raw = import.meta.glob("../content/posts/*.md", {
@@ -70,6 +104,7 @@ function parse(file: string, text: string): BlogPost {
     inlineImage: `/blog/${slug}-key-points.jpg`,
     author: meta.author || SITE.founder,
     wordCount,
+    category: CATEGORY_BY_SLUG[slug] ?? "Selling & Money",
   };
 }
 

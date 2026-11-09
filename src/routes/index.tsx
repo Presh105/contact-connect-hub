@@ -38,6 +38,8 @@ import {
 import heroImage from "@/assets/hero.jpg";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { SITE, abs } from "@/lib/site";
+import { FreeTools } from "@/components/free-tools";
+import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ShareBanner } from "@/components/share-banner";
 
@@ -198,19 +200,7 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <img src="/favicon.png" alt="Status Connect logo" width={32} height={32} className="h-8 w-8 rounded-md" />
-            <span className="font-semibold text-foreground">Status Connect</span>
-          </div>
-          <nav className="flex items-center gap-2" aria-label="Primary">
-            <Link to="/blog"><Button variant="ghost" size="sm">Blog</Button></Link>
-            <Link to="/auth"><Button variant="ghost" size="sm">Log in</Button></Link>
-            <Link to="/auth" search={{ mode: "register" }}><Button size="sm">Register</Button></Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main>
         {/* HERO */}
@@ -398,7 +388,9 @@ function Landing() {
         </section>
 
         {/* BLOG */}
-        <section id="blog" className="border-t border-border bg-muted/30">
+        <FreeTools />
+
+      <section id="blog" className="border-t border-border bg-muted/30">
           <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
             <div className="text-center mb-10">
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">WhatsApp Growth Guides</h2>

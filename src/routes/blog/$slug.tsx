@@ -3,6 +3,7 @@ import { getPost, getRelatedPosts, getHeadings, slugify, REDIRECTS } from "@/lib
 import { SITE, abs } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { BlogBody } from "@/components/blog-body";
+import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -107,18 +108,7 @@ function BlogPostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/favicon.png" alt="Status Connect logo" width={32} height={32} className="h-8 w-8 rounded-md" />
-            <span className="font-semibold text-foreground">Status Connect</span>
-          </Link>
-          <nav className="flex items-center gap-2" aria-label="Primary">
-            <Link to="/blog"><Button variant="ghost" size="sm">Blog</Button></Link>
-            <Link to="/auth" search={{ mode: "register" }}><Button size="sm">Register</Button></Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto max-w-3xl px-4 py-10">
         <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
@@ -128,7 +118,7 @@ function BlogPostPage() {
         <article className="mt-6">
           <header>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {post.tags[0]} · {post.readMinutes} min read
+              {post.category} · {post.readMinutes} min read
             </p>
             <h1 className="mt-2 text-3xl font-bold leading-tight text-foreground md:text-4xl">{post.title}</h1>
             <p className="mt-4 text-lg text-muted-foreground">{post.description}</p>
